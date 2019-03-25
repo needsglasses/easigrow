@@ -1,0 +1,33 @@
+[package]
+
+name = "easigrow"
+version = "0.0.0"
+description = "A fatigue crack growth matching program"
+license = "MIT"
+authors = ["Paul White <paul.white.melb@gmail.com>"]
+readme = "README.md"
+documentation = "README"
+publish = false
+
+[lib]
+name = "fatigue"
+path = "src/lib.rs"
+
+[[bin]]
+name = "easigrow"
+path = "src/main.rs"
+
+[dependencies]
+clap = "*"
+rayon = "*"
+svg = "*"
+clippy = {version = "*", optional = true}
+GSL = {version = "*", optional = true}
+bspline = "*"
+
+[dev-dependencies]
+tempdir = "0.3"
+
+[features]
+default = []
+v2 = ["GSL/v2"]
