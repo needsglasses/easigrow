@@ -25,10 +25,10 @@ impl PairTable {
         }
 
         PairTable {
-            columns: columns,
-            rows: rows,
-            values: values,
-            splines: splines,
+            columns,
+            rows,
+            values,
+            splines,
         }
     }
 

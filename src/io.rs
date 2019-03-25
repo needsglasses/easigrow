@@ -200,7 +200,7 @@ pub fn write_cycles(file: &str, cycles: &[Cycle<Tag>]) {
         Ok(file) => file,
     };
 
-    let _result = writeln!(file, "0 {}\n", cycles.len()).unwrap();
+    writeln!(file, "0 {}\n", cycles.len()).unwrap();
 
     for &Cycle { min, max } in cycles.iter() {
         let result = writeln!(&mut file, "{:?} {:?} 1\n", max.value, min.value);

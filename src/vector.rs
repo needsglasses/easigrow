@@ -14,9 +14,8 @@ impl MVector<f64> {
     // compatability with nalgebra
     pub fn from_row_slice(n: usize, a: &[f64]) -> MVector<f64> {
         let mut m = Vec::new();
-        for i in 0..n {
-            let c = a[i];
-            m.push(c);
+        for value in a.iter().take(n) {
+            m.push(*value);
         }
         MVector::new(m)
     }

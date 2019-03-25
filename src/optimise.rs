@@ -184,6 +184,7 @@ pub fn prediction_error(params: &[f64], options: &[options::EasiOptions]) -> Vec
                 a: option.a.clone(),
                 mono_zone_extent: plastic::ZoneWidth {
                     plane_stress: 0.0,
+                    
                     plane_strain: 0.0,
                 },
                 cyclic_zone_extent: plastic::ZoneWidth {
@@ -237,7 +238,7 @@ pub fn prediction_error(params: &[f64], options: &[options::EasiOptions]) -> Vec
 
             compare_growth(&option.fracto, &history, &option.verbosity)
         })
-        .collect_into(&mut errors);
+        .collect_into_vec(&mut errors);
 
     let mut total_error = Vec::new();
     for (option, prediction_error) in options.iter().zip(&errors) {
@@ -316,7 +317,7 @@ fn compare_growth(
         };
 
         // check if we do not grow the crack from a small enough size
-        if history.len() == 0 {
+        if history.is_empty() {
             panic!("Zero length crack growth history");
         }
 
@@ -429,7 +430,7 @@ mod tests {
 
     fn fake_history(block: f64, a: f64) -> grow::History {
         grow::History {
-            block: block,
+            block,
             k: vec![10.0, 20.0],
             dk: vec![5.0, 10.0],
             stress: 1.0,

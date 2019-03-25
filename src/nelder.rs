@@ -277,11 +277,11 @@ fn count_nelder_ops(ops: &[Operation]) -> NelderSum {
             reduction: 0,
         },
         |mut count, op| {
-            match op {
-                &Operation::Reflection => count.reflection += 1,
-                &Operation::Expansion => count.expansion += 1,
-                &Operation::Contraction => count.contraction += 1,
-                &Operation::Reduction => count.reduction += 1,
+            match *op {
+                Operation::Reflection => count.reflection += 1,
+                Operation::Expansion => count.expansion += 1,
+                Operation::Contraction => count.contraction += 1,
+                Operation::Reduction => count.reduction += 1,
             };
 
             count
@@ -320,15 +320,15 @@ mod tests {
     fn test_centroid() {
         let x = vec![
             Result {
-                x: MVector::from_row_slice(3, &vec![0.0, 0.0, 0.0]),
+                x: MVector::from_row_slice(3, &[0.0, 0.0, 0.0]),
                 score: 0.0,
             },
             Result {
-                x: MVector::from_row_slice(3, &vec![1.0, 2.5, 1.0]),
+                x: MVector::from_row_slice(3, &[1.0, 2.5, 1.0]),
                 score: 0.0,
             },
             Result {
-                x: MVector::from_row_slice(3, &vec![2.0, 3.5, 2.0]),
+                x: MVector::from_row_slice(3, &[2.0, 3.5, 2.0]),
                 score: 0.0,
             },
         ];
@@ -337,7 +337,7 @@ mod tests {
         let ans = vec![1.0, 2.0, 1.0];
 
         for i in 0..3 {
-            assert!(ans[i] == cent.m[i]);
+            assert!((ans[i] - cent.m[i]).abs() < std::f64::EPSILON);
         }
     }
 
@@ -347,15 +347,15 @@ mod tests {
 
         let x = vec![
             Result {
-                x: MVector::from_row_slice(3, &vec![0.0f64, 0.0, 0.0]),
+                x: MVector::from_row_slice(3, &[0.0f64, 0.0, 0.0]),
                 score: 0.0,
             },
             Result {
-                x: MVector::from_row_slice(3, &vec![1.0f64, 1.5, 1.0]),
+                x: MVector::from_row_slice(3, &[1.0f64, 1.5, 1.0]),
                 score: 0.0,
             },
             Result {
-                x: MVector::from_row_slice(3, &vec![2.0f64, 2.5, 2.0]),
+                x: MVector::from_row_slice(3, &[2.0f64, 2.5, 2.0]),
                 score: 0.0,
             },
         ];
@@ -417,15 +417,15 @@ mod tests {
     fn test_nelder_himmelblau() {
         let x_all = vec![[5.0, -5.0], [-5.0, 5.0], [-5.0, -5.0], [0.0, 0.0]];
         let ans_all = vec![
-            [3.584428, -1.848126],
-            [-2.805118, 3.131312],
-            [-3.779310, -3.283186],
+            [3.584_428, -1.848_126],
+            [-2.805_118, 3.131_312],
+            [-3.779_310, -3.283_186],
             [3.0, 2.0],
         ];
 
         for (x, ans) in x_all.iter().zip(ans_all) {
             let f_x = himmelblau(x);
-            let mut y = x.clone();
+            let mut y = *x;
             let result = nelder_mead(
                 &himmelblau,
                 &mut y,

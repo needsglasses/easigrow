@@ -55,6 +55,9 @@ use std::fs::File;
 use std::path::Path;
 use std::io::Write;
 
+extern crate log;
+extern crate env_logger;
+
 #[macro_use]
 extern crate clap;
 extern crate fatigue;
@@ -74,6 +77,8 @@ mod vector;
 mod optimise_gsl;
 
 fn main() {
+    env_logger::init();
+    
     // get all the data
     let materials = material::get_all_dadns();
 
@@ -96,9 +101,16 @@ fn main() {
         std::process::exit(2)
     }
 
-    let (cycles, unclosed) = cycle::cycles_from_sequence(&options.sequence, &options.cycle_method);
+    let unclosed = if options.cycle_infile == "" {
+        let (cycles, left) = cycle::cycles_from_sequence(&options.sequence, &options.cycle_method);
+        options.cycles = cycles;
+        left
+    } else {
+        Vec::new()
+    };    
+
     // process all the modifications to the cycles
-    options.cycles = cycle::process_cycle_mods(&cycles, &options.cycle_mods);
+    options.cycles = cycle::process_cycle_mods(&options.cycles, &options.cycle_mods);
 
     // Only keep those cycles that remain after filtering the cycles
     // and mark the turning points associated with those cycles. This
@@ -106,7 +118,7 @@ fn main() {
     // the filtered cycles are all that is used for crack growth.
     if options.seq_mods.cycles {
         let mut keep = vec![false; options.sequence.len()];
-        for cycle in &cycles {
+        for cycle in &options.cycles {
             keep[cycle.max.index] = true;
             keep[cycle.min.index] = true;
         }
@@ -202,7 +214,7 @@ fn main() {
     if params.is_empty() {
         // extract out the appropriate material parameters from a file
         params = if options.dadn.starts_with("file:") {
-            let filename = options.dadn.trim_left_matches("file:");
+            let filename = options.dadn.trim_start_matches("file:");
             println!(
                 "{}No parameters given, using the dk values in the dadn file {}",
                 COMMENT, filename
@@ -238,7 +250,7 @@ fn main() {
 
         let mut factors = vec![1.0; params.len()]; // non-dimensionalised factors used for optimisation
 
-        let error = optimise_error(&options, &mut factors);
+        optimise_error(&options, &mut factors);
         println!("{}...finished the optimisation. ", COMMENT);
         println!("{}The normalised factors are {:?}", COMMENT, factors);
 
@@ -251,7 +263,6 @@ fn main() {
             .collect::<Vec<f64>>();
 
         println!("{}The scaled optimised factors are: {:?}", COMMENT, params);
-        println!("{}Minimum error: {:?}", COMMENT, error);
 
         if options.scale == 0.0 {
             std::process::exit(0); // not an error if we have performed an optimisation
@@ -321,7 +332,7 @@ fn generate_crack_history(options: &options::EasiOptions, params: &[f64]) -> Vec
         std::process::exit(1);
     }
 
-    if options.cycles.len() < 1 {
+    if options.cycles.is_empty() {
         println!("Error: There are no closed cycles in sequence. Perhaps try the re-order sequence option -r");
         std::process::exit(1);
     }
@@ -373,7 +384,7 @@ fn generate_crack_history(options: &options::EasiOptions, params: &[f64]) -> Vec
         block_limit: options.block_limit,
         next_cycle: 0,
         dadn: dadn_eqn,
-        beta: beta,
+        beta,
         output_vars: options.output_vars.clone(),
     };
 
@@ -387,6 +398,7 @@ fn generate_crack_history(options: &options::EasiOptions, params: &[f64]) -> Vec
         .filter(|c| output_lines.contains(&c.max.index) || output_lines.contains(&c.min.index))
         .count() == 0
     {
+        println!("output_lines {:?}", output_lines);
         println!(
             "
 Warning: There are no sequence lines in the cycle list and so there
@@ -403,7 +415,7 @@ Warning: There are no sequence lines in the cycle list and so there
     // repeating the cycles until a terminating condition stops the
     // growth and ends the for loop.
     for (cycle_no, history) in component.enumerate() {
-        if grow::output_cycle_history(&history, options.output_every, &output_lines, &cycle_no) {
+        if grow::output_cycle_history(&history, options.output_every, &output_lines, cycle_no) {
             grow::display_history_line(&history, &options.output_vars, &options.component);
         }
 

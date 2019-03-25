@@ -45,7 +45,7 @@ pub struct CrackState {
 impl CrackState {
     pub fn new(a: Vec<f64>) -> CrackState {
         CrackState {
-            a: a,
+            a,
             mono_zone_extent: plastic::ZoneWidth {
                 plane_stress: 0.0,
                 plane_strain: 0.0,
@@ -145,11 +145,11 @@ impl History {
         let Cycle {
             max: tag::Tag {
                 value: smax,
-                index: _,
+                ..
             },
             min: tag::Tag {
                 value: smin,
-                index: _,
+                ..
             },
         } = *cycle;
 
@@ -192,7 +192,7 @@ impl History {
             dk_all.push(dk);
 
             // grow the crack an increment
-            let da = eqn.dadn(kmin, kmax, *a);
+            let da = eqn.dadn(kmin, kmax, dadn::CrackState{ a: *a });
             if da.is_nan() {
                 println!(
                     "Error: the dadn calculation has returned an NAN beta {} cycle_dk {} r {}",
@@ -222,8 +222,8 @@ impl History {
             beta: betas,
             crack: CrackState {
                 a: a_all,
-                mono_zone_extent: mono_zone_extent,
-                cyclic_zone_extent: cyclic_zone_extent,
+                mono_zone_extent,
+                cyclic_zone_extent,
             },
         }
     }
@@ -231,11 +231,11 @@ impl History {
 
 pub fn display_history_header(output: &[String]) {
     // write out the headers
-    if output.len() > 0 {
+    if !output.is_empty() {
         for out in output.iter() {
             print!("{:>12} ", out);
         }
-        println!("");
+        println!();
     }
 }
 
@@ -244,7 +244,7 @@ pub fn output_cycle_history(
     his: &History,
     every: i32,
     output_lines: &BTreeSet<usize>,
-    cycle_no: &usize,
+    cycle_no: usize,
 ) -> bool {
     // if every is positive write out every nth block, otherwise if
     // every is negative write out every nth cycle
@@ -306,7 +306,7 @@ pub fn display_history_line(his: &History, output: &[String], component: &Compon
             }
         };
     }
-    println!("");
+    println!();
 }
 
 /// This structure provides a way of remembering the failure messages
@@ -336,7 +336,7 @@ pub fn reached_limit(
         terminate = true;
     }
 
-    if a_limit.len() > 0 && a.iter().zip(a_limit).any(|(a, e)| a >= e) {
+    if !a_limit.is_empty() && a.iter().zip(a_limit).any(|(a, e)| a >= e) {
         message += &format!(
             "{}Failure Event: a{:?} >= a_limit{:?}\n",
             COMMENT, a, a_limit
@@ -358,10 +358,19 @@ pub fn component_failed(
     component: &Component,
     _beta: &Box<beta::Beta>,
 ) -> FailureResult {
-    let mut message = "".to_string();
-    let mut terminate = false;
 
+    let mut terminate = false;
+    let mut message = "".to_string();
+
+    // clippy says to do it this way, but its a bit inconsistent with the multiple failure checks
     // Check whether we have satisfied any termination criteria.
+    // let mut terminate = if component.forward > 0.0 && a[0] > component.forward {
+    //     message += &format!(
+    //         "{}Failure Event: a[{}] > depth[{}]\n",
+    //         COMMENT, a[0], component.forward
+    //     );
+    //     true } else { false };
+
     if component.forward > 0.0 && a[0] > component.forward {
         message += &format!(
             "{}Failure Event: a[{}] > depth[{}]\n",
@@ -369,6 +378,7 @@ pub fn component_failed(
         );
         terminate = true;
     }
+
     if component.material.k1c > 0.0 && kmax > component.material.k1c {
         message += &format!(
             "{}Failure Event: k[{}] > k1c[{}]\n",

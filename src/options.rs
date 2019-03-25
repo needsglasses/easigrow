@@ -116,6 +116,7 @@ pub struct EasiOptions {
     pub cycle_infile: String,
 }
 
+
 impl std::fmt::Display for EasiOptions {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         let _e = writeln!(f, "{}a: {:?}", COMMENT, self.a);

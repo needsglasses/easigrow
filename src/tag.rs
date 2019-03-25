@@ -39,10 +39,6 @@ impl PartialEq for Tag {
     fn eq(&self, other: &Tag) -> bool {
         self.value == other.value
     }
-
-    fn ne(&self, other: &Tag) -> bool {
-        self.value != other.value
-    }
 }
 
 impl PartialOrd for Tag {

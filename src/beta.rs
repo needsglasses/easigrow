@@ -1,6 +1,6 @@
 //! A variety of beta solutions for cracks in different shaped coupons.
 //!
-//! Beta functinos relate the far field loading to the crack tip so
+//! Beta functions relate the far field loading to the crack tip so
 //! they are a function of the geometry and of the size of the crack
 //! in the component. In all the functions here we use
 //! non-dimensionalised factors. All the betas can be called with the
@@ -19,6 +19,8 @@ use std::process;
 use std::f64::consts::{FRAC_PI_2, PI};
 use grow;
 use std::fmt;
+
+use log::{info, error};
 
 // This trait is constructed for betas to allow extra information to
 // be supplied with the betas such as required for a tabular beta or
@@ -49,18 +51,18 @@ pub trait Beta {
         }
 
         let table = table::Table::new(a_on_cs, a_on_ds, values, false);
-        TableBeta { table: table }
+        TableBeta { table }
     }
 }
 
 impl fmt::Display for TableBeta {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let _ = write!(f, "# {:9}\n", "a/d \\ a/c");
+        let _ = writeln!(f, "# {:9}", "a/d \\ a/c");
         let _ = write!(f, "            ");
         for a_on_c in &self.table.columns {
             let _ = write!(f, "{:6.3} ", a_on_c);
         }
-        let _ = write!(f, "\n");
+        let _ = writeln!(f);
 
         for i in 0..self.table.row.len() {
             let _ = write!(f, "{:9.3}   ", self.table.row[i]);
@@ -68,7 +70,7 @@ impl fmt::Display for TableBeta {
                 let value = self.table.values[j][i];
                 let _ = write!(f, "{:6.3} ", value);
             }
-            let _ = write!(f, "\n");
+            let _ = writeln!(f);
         }
         write!(f, "")
     }
@@ -77,18 +79,17 @@ impl fmt::Display for TableBeta {
 /// This is a generic beta value
 /// Some of these betas do not use the phi vector and so the consistentancy is wrong.
 pub fn get_beta_fn(beta_name: &str, component: &grow::Component) -> Box<Beta> {
-    // println!(" a_on_d {}, depth {}, radius {}",  a_on_d, depth, radius);
     let all_betas = get_all_betas(component);
 
     if beta_name.starts_with("file:") {
         let components: Vec<&str> = beta_name.split(':').collect();
         let table = table::Table::read_file(components[1], false);
-        Box::new(TableBeta { table: table })
+        Box::new(TableBeta { table })
     } else {
         match all_betas.into_iter().find(|x| x.name == beta_name) {
             Some(beta) => beta.eqn,
             None => {
-                println!("Error: Unknown beta type {}", beta_name);
+                error!("Error: Unknown beta type {}", beta_name);
                 process::exit(1);
             }
         }
@@ -107,11 +108,11 @@ pub struct BetaCite<'a> {
 pub fn get_all_betas(component: &grow::Component) -> Vec<BetaCite<'static>> {
     vec![
         BetaCite {
-            name: "qct-broek",
+            name: "qct-broek86",
             summary: "quarter circular crack in an infinite plate in tension",
-            cite: "[broek]",
+            cite: "[broek86]",
             args: "",
-            eqn: Box::new(QuarterBroek {}),
+            eqn: Box::new(QuarterBroek86 {}),
         },
         BetaCite {
             name: "seft-newman84",
@@ -164,7 +165,7 @@ pub fn get_all_betas(component: &grow::Component) -> Vec<BetaCite<'static>> {
         },
         BetaCite {
             name: "compact-tada73",
-            summary: "compact speciman in tension (scale is in load units not stress units) ",
+            summary: "compact specimen in tension (scale is in load units not stress units) ",
             cite: "[Tada73]",
             args: "a/d, depth, width",
             eqn: Box::new(CompactCoupon::new(component.sideways, component.forward)),
@@ -191,18 +192,18 @@ pub fn get_all_betas(component: &grow::Component) -> Vec<BetaCite<'static>> {
             eqn: Box::new(CornerCrackConstrainedTensionMcdonald07::new()),
         },
         BetaCite {
-            name: "ssht-bowie",
+            name: "ssht-bowie56",
             summary: "single sided through crack in a circular hole in tension",
-            cite: "[Bowie]",
+            cite: "[Bowie56]",
             args: "a/r",
-            eqn: Box::new(SingleSidedThroughCrackCircularHoleTensionBowie {}),
+            eqn: Box::new(SingleSidedThroughCrackCircularHoleTensionBowie56 {}),
         },
         BetaCite {
-            name: "dsht-bowie",
+            name: "dsht-bowie56",
             summary: "double sided crack through in a circular hole in tension",
-            cite: "[Bowie]",
+            cite: "[Bowie56]",
             args: "a/r",
-            eqn: Box::new(DoubleSidedThroughCrackCircularHoleTensionBowie {}),
+            eqn: Box::new(DoubleSidedThroughCrackCircularHoleTensionBowie56 {}),
         },
         BetaCite {
             name: "dccht-newman81",
@@ -284,7 +285,7 @@ impl Beta for TableBeta {
             self.table.values.clone(),
             false,
         );
-        TableBeta { table: table }
+        TableBeta { table }
     }
 
     fn beta(
@@ -303,9 +304,9 @@ impl Beta for TableBeta {
     }
 }
 
-struct QuarterBroek {}
+struct QuarterBroek86 {}
 
-impl Beta for QuarterBroek {
+impl Beta for QuarterBroek86 {
     fn beta(
         &self,
         _a_on_d: f64,
@@ -341,8 +342,7 @@ impl Beta for QuarterCircularCornerCrackFinitePlateTensionMurakami87 {
             ((1.05 + (-0.44 + 1.06 / 1.3) * a_on_t.powi(2) - 0.25 * a_on_t.powi(4))
                 * (1.0 + (0.08 + 0.40 * a_on_t.powi(2)) * (1.0 - (PI / 4.0).sin()).powi(3))
                 * (1.0 + (0.08 + 0.15 * a_on_t.powi(2)) * (1.0 - (PI / 4.0).cos()).powi(3))
-                * ((PI / 4.0).cos().powi(2) + (PI / 4.0).sin().powi(2)).powf(0.25))
-                / 2.464f64.sqrt(),
+                * ((PI / 4.0).cos().powi(2) + (PI / 4.0).sin().powi(2)).powf(0.25)) / 2.464f64.sqrt()
         ]
     }
 
@@ -425,7 +425,7 @@ impl Beta for SemiEllipticalSurfaceCrackFinitePlateTensionNewman84 {
                 let m2 = -0.54 + 0.89 / (0.2 + a_on_c);
                 let m3 = 0.5 - 1.0 / (0.65 + a_on_c) + 14.0 * (1.0 - a_on_c).powf(24.0);
                 let g = 1.0 + (0.1 + 0.35 * a_on_d.powi(2)) * (1.0 - newman_phi.sin()).powi(2);
-                //            println!("m1 {} m2 {} m3 {} g {} f_w {} f_phi {}", m1, m2, m3, g, f_w, f_phi(a_on_c, newman_phi));
+                info!("m1 {} m2 {} m3 {} g {} f_w {} f_phi {}", m1, m2, m3, g, f_w, f_phi(a_on_c, newman_phi));
 
                 (m1 + m2 * a_on_d.powi(2) + m3 * a_on_d.powi(4)) * g * f_w
                     * f_phi(a_on_c, newman_phi)
@@ -679,9 +679,8 @@ impl Beta for SingleSidedEdgeCrackTensionTada73 {
         let denom = (PI * limited_a_on_d / 2.0).cos();
 
         vec![
-            (num / denom)
-                * (0.752 + 2.02 * limited_a_on_d
-                    + 0.37 * (1.0 - (FRAC_PI_2 * limited_a_on_d).sin()).powi(3)),
+            (num / denom) * (0.752 + 2.02 * limited_a_on_d
+                             + 0.37 * (1.0 - (FRAC_PI_2 * limited_a_on_d).sin()).powi(3))
         ]
     }
 
@@ -769,7 +768,7 @@ impl Beta for DoubleSidedEdgeCrackTensionTada73 {
     }
 }
 
-/// Compact speciman width W, thickness B, 'a_on_d' is really a/w
+/// Compact specimen width W, thickness B, 'a_on_d' is really a/w
 ///
 /// by H. Tada, P.C. Paris and G. R. Irwin.
 struct CompactCoupon {
@@ -781,8 +780,8 @@ impl CompactCoupon {
     // compact_tension_tada73
     fn new(width: f64, depth: f64) -> CompactCoupon {
         CompactCoupon {
-            width: width,
-            depth: depth,
+            width,
+            depth,
         }
     }
 }
@@ -822,6 +821,9 @@ struct SemiEllipticalSurfaceCrackRoundBarBendingMurakami87 {}
 
 impl Beta for SemiEllipticalSurfaceCrackRoundBarBendingMurakami87 {
     fn beta(&self, a_on_d: f64, a_on_c: f64, c_on_b: f64, a_on_r: f64, phis: &[f64]) -> Vec<f64> {
+        // println!("here in murakami bending");
+        // println!("phis {:?}", phis);
+
         let semi_tension = SemiEllipticalSurfaceCrackRoundBarTensionMurakami87 {};
         let st = semi_tension.beta(a_on_d, a_on_c, c_on_b, a_on_r, phis);
         let edge_bending = EdgeCrackStripBendingMurakami87 {};
@@ -829,12 +831,23 @@ impl Beta for SemiEllipticalSurfaceCrackRoundBarBendingMurakami87 {
         let edge_tension = EdgeCrackStripTensionMurakami87 {};
         let et = edge_tension.beta(a_on_d, a_on_c, c_on_b, a_on_r, phis);
 
-        vec![st[0] * eb[0] / et[0], st[1] * eb[1] / et[1]]
+        // println!("st {:?}", st);
+        // println!("eb {:?}", eb);
+        // println!("et {:?}", et);
+        
+        let mut betas = Vec::new();
+        for i in 0..phis.len() {
+            betas.push(st[i] * eb[i] / et[i]);
+        }
+
+        betas
+//        vec![st[0] * eb[0] / et[0], st[1] * eb[1] / et[1]]
     }
 }
 
-/// Semi-elliptical surface crack in a round bar in bending
-/// Murakami and Tsuru 86
+/// Stress Intensity Factor Equations for a Semi-Elliptical Surface Crack in a shaft under bending
+/// Yukitaka Murakami and Hideto Tsuru 86
+/// No. 87-0164B
 /// This is obtained by Murakami using the results for an edge crack in a strip
 /// for which he has equations for both tension and bending whereas the crack in a
 /// round bar is available for tension.
@@ -842,7 +855,7 @@ struct SemiEllipticalSurfaceCrackRoundBarBendingMurakami86 {}
 
 impl Beta for SemiEllipticalSurfaceCrackRoundBarBendingMurakami86 {
     fn beta(&self, a_on_d: f64, a_on_c: f64, c_on_b: f64, a_on_r: f64, phis: &[f64]) -> Vec<f64> {
-        let semi_tension = SemiEllipticalSurfaceCrackRoundBarTensionMurakami87 {};
+        let semi_tension = SemiEllipticalSurfaceCrackRoundBarTensionMurakami86 {};
         let st = semi_tension.beta(a_on_d, a_on_c, c_on_b, a_on_r, phis);
 
         let edge_bending = EdgeCrackStripBendingMurakami87 {};
@@ -879,12 +892,13 @@ impl Beta for SemiEllipticalSurfaceCrackRoundBarTensionMurakami87 {
         _a_on_r: f64,
         _phis: &[f64],
     ) -> Vec<f64> {
-        vec![
-            (1.122 - 0.230 * a_on_c - 0.901 * a_on_c.powi(2) + 0.949 * a_on_c.powi(3)
-                - 0.280 * a_on_c.powi(4))
-                * (1.0 + 0.157 * a_on_d - 0.634 * a_on_d.powi(2) + 4.590 * a_on_d.powi(3)
-                    - 6.628 * a_on_d.powi(4)),
-        ]
+
+        let beta = (1.122 - 0.230 * a_on_c - 0.901 * a_on_c.powi(2) + 0.949 * a_on_c.powi(3)
+                    - 0.280 * a_on_c.powi(4))
+            * (1.0 + 0.157 * a_on_d - 0.634 * a_on_d.powi(2) + 4.590 * a_on_d.powi(3)
+                   - 6.628 * a_on_d.powi(4));
+
+        vec![beta; _phis.len()]            
     }
 }
 
@@ -901,12 +915,13 @@ impl Beta for SemiEllipticalSurfaceCrackRoundBarTensionMurakami86 {
         _a_on_r: f64,
         _phis: &[f64],
     ) -> Vec<f64> {
-        vec![
-            (1.122 - 0.230 * a_on_c - 0.901 * a_on_c.powi(2) + 0.949 * a_on_c.powi(3) - 0.280 * a_on_c.powi(4)) *
-             // The original reference by
-             // Stress Intensity Factor equations for a semi-elliptical surface crack in a shaft under bending
-             (1.0 + 0.314 * a_on_d - 2.536 * a_on_d.powi(2) + 36.72 * a_on_d.powi(3) - 106.048 * a_on_d.powi(4)),
-        ]
+
+        // The original reference by
+        // Stress Intensity Factor equations for a semi-elliptical surface crack in a shaft under bending
+        let beta = (1.122 - 0.230 * a_on_c - 0.901 * a_on_c.powi(2) + 0.949 * a_on_c.powi(3) - 0.280 * a_on_c.powi(4)) *
+            (1.0 + 0.314 * a_on_d - 2.536 * a_on_d.powi(2) + 36.72 * a_on_d.powi(3) - 106.048 * a_on_d.powi(4));
+
+        vec![beta; _phis.len()]            
     }
 }
 
@@ -923,10 +938,11 @@ impl Beta for EdgeCrackStripBendingMurakami87 {
         _a_on_r: f64,
         _phis: &[f64],
     ) -> Vec<f64> {
-        vec![
-            1.121 - 1.199 * a_on_d + 4.775 * a_on_d.powi(2) - 1.628 * a_on_d.powi(3)
-                - 7.035 * a_on_d.powi(4) + 13.27 * a_on_d.powi(5),
-        ]
+
+        let beta = 1.121 - 1.199 * a_on_d + 4.775 * a_on_d.powi(2) - 1.628 * a_on_d.powi(3)
+            - 7.035 * a_on_d.powi(4) + 13.27 * a_on_d.powi(5);
+        
+        vec![beta; _phis.len()]
     }
 }
 
@@ -943,10 +959,11 @@ impl Beta for EdgeCrackStripTensionMurakami87 {
         _a_on_r: f64,
         _phis: &[f64],
     ) -> Vec<f64> {
-        vec![
-            1.12 - 0.231 * a_on_d + 10.55 * a_on_d.powi(2) - 21.72 * a_on_d.powi(3)
-                + 30.39 * a_on_d.powi(4),
-        ]
+
+        let beta = 1.12 - 0.231 * a_on_d + 10.55 * a_on_d.powi(2) - 21.72 * a_on_d.powi(3)
+            + 30.39 * a_on_d.powi(4);
+
+        vec![beta; _phis.len()]
     }
 
     fn area(&self, a_on_d: f64, _a_on_c: f64, _c_on_b: f64, _a_on_r: f64) -> f64 {
@@ -1039,9 +1056,9 @@ impl Beta for CornerCrackConstrainedTensionMcdonald07 {
 //   month = 	 {June}}
 
 /// Bowie solution for a single crack from a circular hole
-struct SingleSidedThroughCrackCircularHoleTensionBowie {}
+struct SingleSidedThroughCrackCircularHoleTensionBowie56 {}
 
-impl Beta for SingleSidedThroughCrackCircularHoleTensionBowie {
+impl Beta for SingleSidedThroughCrackCircularHoleTensionBowie56 {
     fn beta(
         &self,
         _a_on_d: f64,
@@ -1055,9 +1072,9 @@ impl Beta for SingleSidedThroughCrackCircularHoleTensionBowie {
 }
 
 /// Bowie solution for a double cracked circular hole
-struct DoubleSidedThroughCrackCircularHoleTensionBowie {}
+struct DoubleSidedThroughCrackCircularHoleTensionBowie56 {}
 
-impl Beta for DoubleSidedThroughCrackCircularHoleTensionBowie {
+impl Beta for DoubleSidedThroughCrackCircularHoleTensionBowie56 {
     fn beta(
         &self,
         _a_on_d: f64,
@@ -1071,19 +1088,18 @@ impl Beta for DoubleSidedThroughCrackCircularHoleTensionBowie {
 }
 
 /// Another beta factor for a round bar with greater depth and hopefully more accurate than Murakami.
-/// It provides the beta factor at two points arount the crack front.
+/// It provides the beta factor at two points around the crack front.
 ///
 /// Experimental and finite element analyses on stress intensity
 /// factors of an elliptical surface crack in a circular shaft under
 /// tension and bending
-/// C.S. SHIN and C.Q. CAI
+/// C. S. Shin and C. Q. Cai
 /// International Journal of Fracture 129: 239–264, 2004
 struct SemiEllipticalSurfaceCrackRoundBarBendingShin04 {
     deep: table::Table,
     surface: table::Table,
 }
 
-#[cfg_attr(rustfmt, rustfmt_skip)]
 impl SemiEllipticalSurfaceCrackRoundBarBendingShin04 {
     fn new() -> SemiEllipticalSurfaceCrackRoundBarBendingShin04 {
         let a_on_ds = vec![
@@ -1137,8 +1153,8 @@ impl SemiEllipticalSurfaceCrackRoundBarBendingShin04 {
         );
 
         SemiEllipticalSurfaceCrackRoundBarBendingShin04 {
-            deep: deep,
-            surface: surface,
+            deep,
+            surface,
         }
     }
 }
@@ -1173,8 +1189,8 @@ mod tests {
     fn test_centre_crack_tension_fedderson66() {
         let centre = CentreCrackTensionFedderson66 {};
 
-        let phis = vec![0.0, FRAC_PI_2];
-        assert_eq!(centre.beta(0.0, 0.0, 0.0, 0.0, &phis)[0], 1.0);
+        let phis = vec![0.0f64, FRAC_PI_2];
+        assert!(centre.beta(0.0, 0.0, 0.0, 0.0, &phis)[0] - 1.0 < std::f64::EPSILON);
     }
 
     #[test]
@@ -1182,7 +1198,7 @@ mod tests {
         let centre = CentreCrackTensionKoiter65 {};
         let phis = vec![0.0, FRAC_PI_2];
 
-        assert_eq!(centre.beta(0.0, 0.0, 0.0, 0.0, &phis)[0], 1.0);
+        assert!(centre.beta(0.0, 0.0, 0.0, 0.0, &phis)[0] - 1.0 < std::f64::EPSILON);
     }
 
     #[test]
@@ -1190,15 +1206,9 @@ mod tests {
         let corner = CornerCrackConstrainedTensionMcdonald07::new();
         let phis = vec![0.0, FRAC_PI_2];
 
-        assert_eq!(corner.beta(0.0, 0.0, 0.0, 0.0, &phis)[0], 0.709411963);
-        assert_eq!(
-            corner.beta(0.00010 / 25.0e-3, 0.0, 0.0, 0.0, &phis)[0],
-            0.709411963
-        );
-        assert!(
-            (corner.beta(0.00987285 / 25.0e-3, 0.0, 0.0, 0.0, &phis)[0] - 1.4485189776434797).abs()
-                < 1e-3
-        );
+        assert!((corner.beta(0.0, 0.0, 0.0, 0.0, &phis)[0] - 0.709411963).abs() < std::f64::EPSILON);
+        assert!((corner.beta(0.00010 / 25.0e-3, 0.0, 0.0, 0.0, &phis)[0] - 0.709411963).abs() < std::f64::EPSILON);
+        assert!((corner.beta(0.00987285 / 25.0e-3, 0.0, 0.0, 0.0, &phis)[0] - 1.4485189776434797).abs() < 1e-3);
     }
 
     #[test]
@@ -1255,8 +1265,8 @@ mod tests {
         let phis = vec![0.0, FRAC_PI_2];
         let semi = SemiEllipticalSurfaceCrackInfinitePlateTensionAnderson05 {};
 
-        assert_eq!(semi.beta(0.0, 1.0, 0.0, 0.0, &phis)[0], 0.662541348868913);
-        assert_eq!(semi.beta(0.0, 0.5, 0.0, 0.0, &phis)[0], 0.8959634744787476);
+        assert!((semi.beta(0.0, 1.0, 0.0, 0.0, &phis)[0] - 0.662541348868913).abs() < std::f64::EPSILON);
+        assert!((semi.beta(0.0, 0.5, 0.0, 0.0, &phis)[0] - 0.8959634744787476).abs() < std::f64::EPSILON);
     }
 
     #[test]
@@ -1264,8 +1274,8 @@ mod tests {
         let phis = vec![0.0, FRAC_PI_2];
         let semi = SemiEllipticalSurfaceCrackFinitePlateTensionNewman84 {};
 
-        assert_eq!(semi.beta(0.0, 1.0, 0.0, 0.0, &phis)[0], 0.6625413488689131);
-        assert_eq!(semi.beta(0.0, 0.5, 0.0, 0.0, &phis)[0], 0.8959634744787476);
+        assert!(semi.beta(0.0, 1.0, 0.0, 0.0, &phis)[0] - 0.6625413488689131 < std::f64::EPSILON);
+        assert!(semi.beta(0.0, 0.5, 0.0, 0.0, &phis)[0] - 0.8959634744787476 < std::f64::EPSILON);
     }
 
     #[test]
@@ -1296,8 +1306,8 @@ mod tests {
             semi.beta(0.5, 0.0, 0.0, 0.0, &phis)
         );
 
-        let quarter = QuarterBroek {};
-        println!("Quarterbroek {:?}", quarter.beta(0.0, 0.0, 0.0, 0.0, &phis));
+        let quarter = QuarterBroek86 {};
+        println!("Quarterbroek86 {:?}", quarter.beta(0.0, 0.0, 0.0, 0.0, &phis));
 
         let quarter = QuarterCircularCornerCrackFinitePlateTensionMurakami87 {};
         println!(
@@ -1379,7 +1389,7 @@ mod tests {
 
         let result = semi.beta(0.5, 1.0, 0.0, 0.0, &phis)[0];
         println!("Result: {}", result);
-        assert!((result - 0.5236).abs() < 1e-3);
+        assert!((result - 0.524).abs() < 1e-3);
 
         let result = semi.beta(0.8, 1.0, 0.0, 0.0, &phis)[0];
         println!("Result: {}", result);
@@ -1406,7 +1416,7 @@ mod tests {
     fn manual_check_print_round_bar_table_murakami87() {
         // prints the beta table from murakami P. 658.
         // The first row of the table for a/d = 0 is correct but there is a slight error thereafter.
-        // This implies ther is an error with the a/d effect (a/d > 0)
+        // This implies there is an error with the a/d effect (a/d > 0)
 
         // This is the generated version of the beta table using the code
         // below. The results in this table are slightly different from the
@@ -1454,15 +1464,16 @@ mod tests {
         // 0.23 | 0.861  0.837  0.804  0.764  0.721  0.677  0.636  0.597  0.562  0.532  0.506
         // 0.24 | 0.852  0.829  0.795  0.756  0.714  0.671  0.629  0.591  0.556  0.527  0.501
         // 0.25 | 0.844  0.820  0.787  0.748  0.706  0.664  0.623  0.585  0.551  0.521  0.496
-
-        //        let table_beta = SemiEllipticalSurfaceCrackRoundBarBendingMurakami87::new();
-        //        println!("{}", table_beta);
+        
+        let table_beta = SemiEllipticalSurfaceCrackRoundBarBendingMurakami87 {};
+        println!("{}", table_beta.as_table());
     }
 
     #[test]
     fn manual_check_print_round_bar_table_murakami86() {
         // prints the beta table from Murakami and Tsuru 86
-        //        display_table(SemiEllipticalSurfaceCrackRoundBarBendingMurakami86::new());
+        let table_beta = SemiEllipticalSurfaceCrackRoundBarBendingMurakami86 {};
+        println!("{}", table_beta.as_table());
     }
 
     #[test]

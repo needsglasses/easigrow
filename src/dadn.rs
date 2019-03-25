@@ -7,6 +7,15 @@ use table;
 use std::f64::consts::FRAC_PI_2;
 use std::{fmt, process, f64};
 
+use log::{info, warn, error};
+
+/// Defines the state of the crack for any dadn equation that requires
+/// some sort of memory.
+pub struct CrackState {
+    // length of the crack
+    pub a: f64
+}
+
 pub enum DadnEqn {
     Nasgro,
     Forman,
@@ -15,6 +24,7 @@ pub enum DadnEqn {
     Burchill,
     Hartman,
     White,
+    Kujawski,
 }
 
 /// data for White equation
@@ -28,6 +38,17 @@ pub struct White {
     e: f64,
     f: f64,
     kic: f64,
+    cite: String,
+    units: String,
+}
+
+/// data for Kujawski equation
+/// $$ dadn =
+#[derive(Debug, Clone)]
+pub struct Kujawski {
+    c: f64,
+    m: f64,
+    alpha: f64,
     cite: String,
     units: String,
 }
@@ -133,7 +154,7 @@ pub trait DaDn {
     /// Currently we also pass it the crack length which is currently
     /// not used by all equations but it could be generalise to be a
     /// general memory state parameter.
-    fn dadn(&self, kmin: f64, kmax: f64, a: f64) -> f64;
+    fn dadn(&self, kmin: f64, kmax: f64, state: CrackState) -> f64;
 }
 
 pub struct Closure<T: ?Sized> {
@@ -154,10 +175,10 @@ impl<T: ?Sized> Closure<T> {
         closure_end: f64,
     ) -> Closure<T> {
         Closure {
-            a_start: a_start,
-            a_end: a_end,
-            closure_start: closure_start,
-            closure_end: closure_end,
+            a_start,
+            a_end,
+            closure_start,
+            closure_end,
             eqn: model,
         }
     }
@@ -187,10 +208,10 @@ impl<T: DaDn + ?Sized> DaDn for Closure<T> {
         vec![]
     }
 
-    fn dadn(&self, kmin: f64, kmax: f64, a: f64) -> f64 {
-        let kmin_with_closure = (kmax * self.closure(a)).max(kmin);
+    fn dadn(&self, kmin: f64, kmax: f64, state: CrackState) -> f64 {
+        let kmin_with_closure = (kmax * self.closure(state.a)).max(kmin);
 
-        self.eqn.dadn(kmin_with_closure, kmax, a)
+        self.eqn.dadn(kmin_with_closure, kmax, state)
     }
 }
 
@@ -215,7 +236,7 @@ impl White {
             e: x[4],
             f: x[5],
             kic: x[6],
-            cite: cite,
+            cite,
             units: String::from("m"),
         }
     }
@@ -246,7 +267,7 @@ impl DaDn for White {
     }
 
     // note the signs of the b,d and f variables has been change to make all the coefficients positive
-    fn dadn(&self, kmin: f64, kmax: f64, _a: f64) -> f64 {
+    fn dadn(&self, kmin: f64, kmax: f64, _state: CrackState) -> f64 {
         // this function does not work well if the rmax variable is
         // included in the optimisation so we set it directly
         // let rmax = coeffs[7];
@@ -272,6 +293,49 @@ impl DaDn for White {
     }
 }
 
+/// Kujawski equation
+/// parameters = [c, n, k]
+impl Kujawski {
+    pub fn new(x: &[f64], cite: String) -> Kujawski {
+        Kujawski {
+            c: x[0],
+            m: x[1],
+            alpha: x[2],
+            cite,
+            units: String::from("m"),
+        }
+    }
+}
+
+impl DaDn for Kujawski {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut _e = writeln!(f, "{:?}", self);
+        write!(
+            f,
+            "#  da/dN ({units}) = {c:e} * [Kmax ^ {alpha} * ΔK^ {{1 - {alpha}}}]^{m}  [Kujawski01]",
+            units = self.units,
+            c = self.c,
+            m = self.m,
+            alpha = self.alpha,
+        )
+    }
+
+    fn update(&mut self, x: &[f64]) {
+        self.c = x[0];
+        self.m = x[1];
+        self.alpha = x[2];
+    }
+
+    fn variables(&self) -> Vec<f64> {
+        vec![self.c, self.m, self.alpha]
+    }
+
+    fn dadn(&self, kmin: f64, kmax: f64, _state: CrackState) -> f64 {
+        let delta_k = kmax.max(0.0) - kmin.max(0.0);
+        self.c * (kmax.max(0.0).powf(self.alpha) * delta_k.powf(1.0 - self.alpha)).powf(self.m)
+    }
+}
+
 /// Burchill equation
 /// da/dN = c (\Delta K)^n / ((1-R) Kf - \Delta K)
 /// parameters = [c, n, k]
@@ -282,7 +346,7 @@ impl Burchill {
             m: x[1],
             d: x[2],
             n: x[3],
-            cite: cite,
+            cite,
             units: String::from("m"),
         }
     }
@@ -293,7 +357,7 @@ impl DaDn for Burchill {
         let mut _e = writeln!(f, "{:?}", self);
         write!(
             f,
-            "#  da/dN ({units}) = {c:e} * ΔKmax ^ {m} - {d:e} Kmin ^ {n}]  [Burchill17]",
+            "#  da/dN ({units}) = {c:e} * Kmax ^ {m} - {d:e} Kmin ^ {n}]  [Burchill17]",
             units = self.units,
             c = self.c,
             m = self.m,
@@ -313,7 +377,7 @@ impl DaDn for Burchill {
         vec![self.c, self.m, self.d, self.n]
     }
 
-    fn dadn(&self, kmin: f64, kmax: f64, _a: f64) -> f64 {
+    fn dadn(&self, kmin: f64, kmax: f64, _state: CrackState) -> f64 {
         (self.c * kmax.max(0.0).powf(self.m) - self.d * kmin.max(0.0).powf(self.n))
     }
 }
@@ -339,7 +403,7 @@ impl Nasgro {
             c: x[8],
             n: x[9],
             a_intr: x[10],
-            cite: cite,
+            cite,
             units: String::from("m"),
         }
     }
@@ -397,7 +461,7 @@ impl DaDn for Nasgro {
         ]
     }
 
-    fn dadn(&self, kmin: f64, kmax: f64, a: f64) -> f64 {
+    fn dadn(&self, kmin: f64, kmax: f64, state: CrackState) -> f64 {
         let r = kmin / kmax;
         let delta_k = kmax - kmin;
 
@@ -419,16 +483,16 @@ impl DaDn for Nasgro {
             a0 - 2.0 * a1
         };
 
-        // println!("Nasgro: {} {} {} {} {}", a0, a1, a3, a2, f);
+        info!("Nasgro: {} {} {} {} {}", a0, a1, a3, a2, f);
         // a_int = intrinsic crack size, typically 38.1e-6 (m)
-        let deltak_th = self.deltak0 * (a / (a + self.a_intr)).sqrt()
+        let deltak_th = self.deltak0 * (state.a / (state.a + self.a_intr)).sqrt()
             / ((1.0 - f) / ((1.0 - a0) * (1.0 - r))).powf(1.0 + self.cth * r);
 
-        //        println!("nasgro: deltak_th {}", deltak_th);
+        info!("nasgro: deltak_th {}", deltak_th);
         let num = (1.0 - (deltak_th.min(delta_k - 1e-6) / delta_k)).powf(self.p);
         let denom = (1.0 - (kmax / self.k_crit)).powf(self.q);
         let dadn = self.c * (((1.0 - f) / (1.0 - r)) * delta_k).powf(self.n) * num / denom;
-        // println!("nasgro: dadn {} {} {}", dadn, num, denom);
+        info!("nasgro: dadn {} {} {}", dadn, num, denom);
         dadn
     }
 }
@@ -442,7 +506,7 @@ impl Forman {
             c: x[0],
             n: x[1],
             kf: x[2],
-            cite: cite,
+            cite,
             units: String::from("m"),
         }
     }
@@ -471,7 +535,7 @@ impl DaDn for Forman {
         vec![self.c, self.n, self.kf]
     }
 
-    fn dadn(&self, kmin: f64, kmax: f64, _a: f64) -> f64 {
+    fn dadn(&self, kmin: f64, kmax: f64, _state: CrackState) -> f64 {
         let delta_k = kmax - kmin.max(0.0);
         let r = kmin.max(0.0) / kmax;
 
@@ -491,7 +555,7 @@ impl Paris {
         Paris {
             c: x[0],
             m: x[1],
-            cite: cite,
+            cite,
             units: String::from("m"),
         }
     }
@@ -516,7 +580,7 @@ impl DaDn for Paris {
         vec![self.c, self.m]
     }
 
-    fn dadn(&self, kmin: f64, kmax: f64, _a: f64) -> f64 {
+    fn dadn(&self, kmin: f64, kmax: f64, _state: CrackState) -> f64 {
         let delta_k = kmax.max(0.0) - kmin.max(0.0);
 
         self.c * delta_k.powf(self.m)
@@ -533,7 +597,7 @@ impl Hartman {
             k_thr: x[1],
             a: x[2],
             alpha: x[3],
-            cite: cite,
+            cite,
             units: String::from("m"),
         }
     }
@@ -557,14 +621,14 @@ impl DaDn for Hartman {
         vec![self.d, self.k_thr, self.a, self.alpha]
     }
 
-    fn dadn(&self, kmin: f64, kmax: f64, _a: f64) -> f64 {
+    fn dadn(&self, kmin: f64, kmax: f64, _state: CrackState) -> f64 {
         let delta_k = kmax - kmin.max(0.0);
         let r = kmin.max(0.0) / kmax;
 
         let kmax = delta_k / (1.0 - r);
 
         if kmax > self.a {
-            println!("***Warning: A kmax of {} is > {} and therefore cannot be square-rooted in the Hartman-Schijve equation", kmax, self.a);
+            warn!("***Warning: A kmax of {} is > {} and therefore cannot be square-rooted in the Hartman-Schijve equation", kmax, self.a);
         }
 
         if delta_k > self.k_thr {
@@ -587,7 +651,7 @@ impl Walker {
             c: x[0],
             m: x[1],
             n: x[2],
-            cite: cite,
+            cite,
             units: String::from("m"),
         }
     }
@@ -617,7 +681,7 @@ impl DaDn for Walker {
         vec![self.c, self.m, self.n]
     }
 
-    fn dadn(&self, kmin: f64, kmax: f64, _a: f64) -> f64 {
+    fn dadn(&self, kmin: f64, kmax: f64, _state: CrackState) -> f64 {
         let delta_k = (kmax - kmin.max(0.0)).max(0.0);
         let r = (kmin / kmax).max(0.0);
 
@@ -636,13 +700,13 @@ impl DaDn for table::Table {
         for col in &self.columns {
             let _ = write!(f, " {:12}", col);
         }
-        let _ = writeln!(f, "");
+        let _ = writeln!(f);
         for i in 0..self.row.len() {
             let _ = write!(f, "#  {:10.3e}: ", (10.0f64).powf(self.row[i]));
             for j in 0..self.values.len() {
                 let _ = write!(f, "  {:10} ", self.values[j][i]);
             }
-            let _ = write!(f, "\n");
+            let _ = writeln!(f);
         }
         write!(f, "")
     }
@@ -666,18 +730,18 @@ impl DaDn for table::Table {
             .collect::<Vec<f64>>()
     }
 
-    fn dadn(&self, kmin: f64, kmax: f64, _a: f64) -> f64 {
-        //        println!("kmin {} kmax {}", kmin, kmax);
+    fn dadn(&self, kmin: f64, kmax: f64, _state: CrackState) -> f64 {
+        info!("kmin {} kmax {}", kmin, kmax);
         let rmax = self.columns[self.columns.len() - 1];
         let rmin = self.columns[0];
         let delta_k = kmax - kmin.max(0.0);
         let r = (kmin / kmax).max(rmin).min(rmax);
 
-        //        println!("delta k {dk} r limited {r}", dk=delta_k, r=r);
+        info!("delta k {dk} r limited {r}", dk=delta_k, r=r);
         let interp = self.interp(delta_k, r);
-        //        println!("Interp {}", interp);
+        info!("Interp {}", interp);
         let value = (10.0f64).powf(interp);
-        //        println!("value {}", value);
+        info!("value {}", value);
         value
     }
 }
@@ -693,13 +757,13 @@ impl DaDn for table::PairTable {
         for col in &self.columns {
             let _ = write!(f, " {:12}", col);
         }
-        let _ = writeln!(f, "");
+        let _ = writeln!(f);
         for i in 0..self.rows.len() {
             for j in 0..self.values.len() {
                 let _ = write!(f, "  {:10.3e}: ", (10.0f64).powf(self.rows[j][i]));
                 let _ = write!(f, "  {:10} ", self.values[j][i]);
             }
-            let _ = write!(f, "\n");
+            let _ = writeln!(f);
         }
         write!(f, "")
     }
@@ -723,18 +787,18 @@ impl DaDn for table::PairTable {
             .collect::<Vec<f64>>()
     }
 
-    fn dadn(&self, kmin: f64, kmax: f64, _a: f64) -> f64 {
-        //        println!("kmin {} kmax {}", kmin, kmax);
+    fn dadn(&self, kmin: f64, kmax: f64, _state: CrackState) -> f64 {
+        info!("kmin {} kmax {}", kmin, kmax);
         let rmax = self.columns[self.columns.len() - 1];
         let rmin = self.columns[0];
         let delta_k = kmax - kmin.max(0.0);
         let r = (kmin / kmax).max(rmin).min(rmax);
 
-        //        println!("delta k {dk} r limited {r}", dk=delta_k, r=r);
+        info!("delta k {dk} r limited {r}", dk=delta_k, r=r);
         let interp = self.interp(delta_k, r);
-        //        println!("Interp {}", interp);
+        info!("Interp {}", interp);
         let value = (10.0f64).powf(interp);
-        //        println!("value {}", value);
+        info!("value {}", value);
         value
     }
 }
@@ -762,6 +826,8 @@ pub fn make_model(model_name: &str, params: &[f64], cite: String) -> Box<DaDn> {
         Box::new(Walker::new(&params, cite)) as Box<DaDn>
     } else if dadn.contains("burchill") {
         Box::new(Burchill::new(&params, cite)) as Box<DaDn>
+    } else if dadn.contains("kujawski") {
+        Box::new(Kujawski::new(&params, cite)) as Box<DaDn>
     } else if dadn.contains("nasgro") {
         Box::new(Nasgro::new(&params, cite)) as Box<DaDn>
     } else if dadn.contains("file") {
@@ -773,11 +839,11 @@ pub fn make_model(model_name: &str, params: &[f64], cite: String) -> Box<DaDn> {
             table.values,
             true,
         );
-        if params.len() > 0 {
+        if !params.is_empty() {
             if params.len() == log_table.values.iter().fold(0, |sum, x| sum + x.len()) {
                 log_table.update(&params);
             } else {
-                println!(
+                error!(
                     "Error: the number of parameters {} != the no. of table values {}",
                     params.len(),
                     log_table.values.len()
@@ -788,7 +854,7 @@ pub fn make_model(model_name: &str, params: &[f64], cite: String) -> Box<DaDn> {
 
         Box::new(log_table) as Box<DaDn>
     } else {
-        println!("Error: Unknown dadn equation: {:?}", model_name);
+        error!("Error: Unknown dadn equation: {:?}", model_name);
         process::exit(1)
     }
 }
@@ -798,6 +864,32 @@ mod tests {
     use super::*;
     use table;
     use material;
+
+    #[test]
+    fn check_kujawski() {
+        let materials = material::get_all_dadns();
+        let kujawski_eqn = match materials.iter().find(|m| m.name == "kujawski:default") {
+            Some(m) => &m.eqn,
+            None => panic!(),
+        };
+
+        // 6 ksi sqrt(in) gives dadn = 1.25e-6 in
+        let da = kujawski_eqn.dadn(0.0, 6.6, CrackState {a: 0.0});
+        println!("kujawski da/dn {}", da);
+        assert!((da - 2.87496e-8).abs() < 1.0e-10);
+
+        let kujawski_eqn = Kujawski::new(&[1e-10, 3.0, 0.25], String::from("test"));
+        let da = kujawski_eqn.dadn(0.0, 6.6, CrackState {a: 0.0});
+        println!("kujawski da/dn {}", da);
+        assert!((da - 2.87496e-8).abs() < 1.0e-10);
+
+        let kujawski_eqn = Kujawski::new(&[1e-10, 3.0, 0.25], String::from("test"));
+        let da = kujawski_eqn.dadn(3.0, 6.6, CrackState {a: 0.0});
+        println!("kujawski da/dn {}", da);
+        assert!((da - 0.735_086_7e-8).abs() < 1.0e-10);
+       
+    }
+
     #[test]
     fn check_tabular() {
         let table = table::Table::new(
@@ -809,13 +901,13 @@ mod tests {
             true,
         );
 
-        assert_eq!(table.dadn(0.0, 10.0, 0.0), 1e-8);
+        assert!((table.dadn(0.0, 10.0, CrackState {a: 0.0}) - 1e-8).abs() < std::f64::EPSILON);
         println!("dadn: min -5.0, max 10.0");
-        assert_eq!(table.dadn(-5.0, 10.0, 0.0), 1e-8);
-        //        assert_eq!(table.dadn(10.0, 20.0, 0.0), 1e-7);
+        assert!((table.dadn(-5.0, 10.0, CrackState {a: 0.0}) - 1e-8).abs() < std::f64::EPSILON);
+
         println!("dadn: min 0.0, max 12.5");
-        assert_eq!(table.dadn(0.0, 12.5, 0.0), 3.162277660168379e-08);
-        assert_eq!(table.dadn(12.5, 25.0, 0.0), 0.000000562341325190349);
+        assert!((table.dadn(0.0, 12.5, CrackState {a: 0.0}) - 3.162_277_660_168_379e-08).abs() < std::f64::EPSILON);
+        assert!((table.dadn(12.5, 25.0, CrackState {a: 0.0}) - 0.000_000_562_341_325_190_349).abs() < std::f64::EPSILON);
     }
 
     #[test]
@@ -825,8 +917,8 @@ mod tests {
         let w1 = Walker::new(&[1e-8, 0.5, 2.0], String::from("testing"));
         let w2 = Walker::new(&[1e-8, 2.5, 2.0], String::from("testing"));
 
-        let a1 = w1.dadn(0.0, 10.0, 0.1);
-        let a2 = w2.dadn(0.0, 10.0, 0.1);
+        let a1 = w1.dadn(0.0, 10.0, CrackState {a: 0.1});
+        let a2 = w2.dadn(0.0, 10.0, CrackState {a: 0.1});
 
         assert!((a1 - a2).abs() < 1e-8);
     }
@@ -840,7 +932,7 @@ mod tests {
         };
 
         // 6 ksi sqrt(in) gives dadn = 1.25e-6 in
-        let da = nasgro_eqn.dadn(0.0, 6.6, 0.0);
+        let da = nasgro_eqn.dadn(0.0, 6.6, CrackState {a: 0.0});
         println!("nasgro da/dn {}", da);
         assert!(((da - 3.2668e-8).abs() / da) < 1.0e-3);
     }

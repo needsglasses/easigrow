@@ -45,10 +45,10 @@ impl PairTable {
         }
 
         PairTable {
-            columns: columns,
-            rows: rows,
-            values: values,
-            splines: splines,
+            columns,
+            rows,
+            values,
+            splines,
         }
     }
 
@@ -69,23 +69,24 @@ impl PairTable {
     /// column variables are capped to be the maximum or minimum values
     /// in the table.
     pub fn interp(&self, row: f64, column: f64) -> f64 {
-        //        println!("New interpolation row: {}, column: {}", row, column);
+        println!("New interpolation row: {}, column: {}", row, column);
         let col_limited = column
             .max(self.columns[0])
             .min(self.columns[(self.columns.len() - 1)]);
         let col_low = nearest(col_limited, &self.columns);
         let row_limited = row.max(self.rows[col_low][0])
             .min(self.rows[col_low][(self.rows[col_low].len() - 1)]);
-        //        println!("Col limited {:?}, row limited {:?}", col_limited, row_limited );
-        //        println!("col {}", col_low);
+               println!("Col limited {:?}, row limited {:?}", col_limited, row_limited );
+               println!("col {}", col_low);
 
-        //        println!("Columns: {:?}", self.columns);
-        //        println!("interp for {} using col {}", row, col_low);
-        //        println!("knot domain {:?}", self.splines[col_low].knot_domain());
+               println!("Columns: {:?}", self.columns);
+               println!("interp for {} using col {}", row, col_low);
+               println!("knot domain {:?}", self.splines[col_low].knot_domain());
+
         let row_s = self.splines[col_low].point(row_limited);
-        //        println!("done interp row_s {}", row_s);
+               println!("done interp row_s {}", row_s);
 
-        //        println!("No. of columns {}", self.columns.len());
+               println!("No. of columns {}", self.columns.len());
         // simple linear interpolation between the lower and upper columns
         if self.columns.len() > 1 {
             //            println!("End interpolation");

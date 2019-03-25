@@ -156,7 +156,13 @@ dadn2 deltaK2_r1 deltaK2_r2 ....
         ["[Newman81]", " J. C. Newman Jr. and I. S. Raju
            Stress intensity factor equations for cracks
            in three-dimensional finite bodies, 
-           Nasa Technical Memorandum 83299, 1981 p 1--49."],
+           NASA Technical Memorandum 83299, 1981 p 1--49."],
+
+        ["[Newman81]", " J. C. Newman Jr. and I. S. Raju
+           Stress-intensity factor equations for
+           cracks in three-dimensional finite bodies
+           subjected to tension and bending loads, 
+           NASA Technical Memorandum 85739, 1984."],
 
         ["[Anderson05]", "T. L. Anderson
            Fracture Mechanics - Fundamentals and Applications
@@ -170,7 +176,8 @@ dadn2 deltaK2_r1 deltaK2_r2 ....
           Stress Intensity Factors Handbook. Vol 2
           Pergamon Press, Oxford, , 1987"],
 
-        ["[Murakami86]", "Y. Murakami and Tsuru
+        ["[Murakami87a]", "Yukitaka Murakami and Hideto Tsuru
+          Stress Intensity factor equations for a semi-elliptical surface crack in a shaft under bending
           1986"],
 
         ["[Schwarmann86]", "L. Schwarmann
@@ -181,16 +188,33 @@ dadn2 deltaK2_r1 deltaK2_r2 ....
         ["[Fedderson66]", "
          Taken from Damage Tolerant Design handbook from AFGROW documentation."],
 
+        ["[Kujawski01]", "Daniel Kujawski, 
+          A fatigue crack driving force parameter with load ratio effects
+          International Journal of Fatigue, Vol 23, S239-S246, 2001"],
+
         ["[Walker70]", "K. Walker
           The effect of stress ratio during crack propagation and fatigue for {2024-T3} and {7075-T6} aluminum
           Effects of Environment and Complex Load History for Fatigue Life, 
           American Society for Testing and Materials,Special Technical Publication 462, 1970"],
 
+        ["[Jones12]", "Jones, R., Molent, L. & Walker, K.  
+          Fatigue crack growth in a diverse
+          range of materials, International Journal of Fatigue Vol. 40,pages 43--50, 2012"],
+        
         ["[Hartman70]", "A. Hartman and J. Schijve
           The effects of environment and load frequency on the
           crack propagation law for macro fatigue crack growth in aluminum alloys,
           Engineering Fracture Mechanics, Vol. 1(4), 1970"],
 
+        ["[Shin04]", "C.S. Shin and C. Q. CAI
+          Experimental and finite element analyses on stress intensity
+          factors of an elliptical surface crack in a circular shaft under
+          tension and bending,
+          International Journal of Fracture 129: 239–264, 2004."],
+
+        ["[Forman05]", "R. G. Forman, V. Shivakumar, J. W. Cardinal , L. C. Williams and P. C. McKeighan 
+                        Fatigue Crack Growth Database for Damage Tolerance Analysis, 
+                        DOT/FAA/AR-05/15, 2005."],
     ];
 
     // Set up a new counter to automatically label the section headers
@@ -224,7 +248,7 @@ dadn2 deltaK2_r1 deltaK2_r2 ....
         println!(
             "{:20} {:30} {} {}",
             beta.name,
-            format!("{}", beta.args),
+            beta.args.to_string(),
             beta.summary,
             beta.cite
         );
@@ -252,18 +276,18 @@ tension   Crack growth calculated from tension part of cycle i.e. from a valley 
 "
     );
 
-    println!("{:35} {:20} {}", "Name", "Ref.", "Coefficients");
+    println!("{:35} {:20} Coefficients", "Name", "Ref.");
     let materials = material::get_all_dadns();
     for mat in materials.iter() {
         print!("{:35} {:20} ", mat.name, mat.cite);
         for num in &mat.eqn.variables() {
             print!("{:.5e} ", num)
         }
-        println!("");
+        println!();
     }
     println!(
-        "{:35} {:20} {}",
-        "file:FILE", "", "Read FILE of tabular dadn data."
+        "{:35} {:20} {:30}",
+        "file:FILE", " ", "Read FILE of tabular dadn data."
     );
 
     header.section("File formats");
@@ -279,7 +303,7 @@ tension   Crack growth calculated from tension part of cycle i.e. from a valley 
         println!("{} {}\n", bib[0], bib[1]);
     }
 
-    println!("");
+    println!();
 }
 
 struct Counter {

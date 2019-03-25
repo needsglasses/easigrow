@@ -14,7 +14,8 @@
 
 use grow::History;
 use std::str::FromStr;
-
+use numbers::NonNan;
+    
 // create the image using SVG
 use svg::Document;
 use svg::node::element;
@@ -73,7 +74,13 @@ impl FromStr for ImageType {
 /// This model indicate the color is based on Kmax.
 fn kmax_color_model(cycle: &History, cycle_max: &History) -> f64 {
     // cap the r ratio
-    (cycle.k[0] / cycle_max.k[0]).max(0.0).powf(0.6).min(1.0)
+    // println!("color K: {} {}", cycle.k[0], cycle_max.k[0]);
+    //    (cycle.k[0] / cycle_max.k[0]).max(0.0).powf(0.6).min(1.0)
+
+    // The max min limits limit the display to a nice grey tone rather
+    // than having black or white bands
+    (cycle.k[0] / cycle_max.k[0]).powf(3.0).min(0.65).max(0.45)
+
 }
 
 /// Make a pseudo image of the fracture surface.
@@ -86,9 +93,7 @@ pub fn write_svg_pseudo_image(history: &[History], frame: &ImageData, filename: 
     println!("frame: {:?}", frame);
     // calculate the maximum cycle in the history
     //    let history_max = grow::cumulative_history(history);
-    println!("***Tempory hack in image***");
     println!("cycles in history {}", history.len());
-    let history_max = history;
 
     // check that the last point is the maximum
     let a_max = history[history.len() - 1].crack.a[0];
@@ -104,8 +109,8 @@ pub fn write_svg_pseudo_image(history: &[History], frame: &ImageData, filename: 
     let nbar = 10i32; // put this number of micron bars along the image
 
     //average over the length of a pixel
-    let pixel_size = (a_max - a_init) / frame.ysize as f64; // size of a pixel
-
+    let pixel_size = (a_max - a_init) / f64::from(frame.ysize); // size of a pixel
+    println!("Pixel size is {:.3e}", pixel_size);
     let mut cblock = history[0].block.floor() + 1.0;
     let bar_pixels = (frame.barlength / pixel_size) as u32;
 
@@ -119,9 +124,11 @@ pub fn write_svg_pseudo_image(history: &[History], frame: &ImageData, filename: 
         .set("height", frame.xsize);
 
     document = document.add(path);
-
+    let cycle_max = history.iter().max_by(|h0, h| NonNan::new(h0.k[0]).cmp(&NonNan::new(h.k[0]))).unwrap();
+    println!("cycle max: {:?}", cycle_max);
+    
     // plot each cycle in the history
-    for (cycle, cycle_max) in history.iter().zip(history_max.iter()) {
+    for cycle in history.iter() {
         //        println!("{:?}", cycle);
         let striation = cycle.crack.a[0] - a_prev; // the width of the current striation
         a_prev = cycle.crack.a[0];
@@ -137,7 +144,7 @@ pub fn write_svg_pseudo_image(history: &[History], frame: &ImageData, filename: 
         sum_color = 0.0;
         delta_a = 0.0;
 
-        let y_cur = frame.ysize as f64 * ((cycle.crack.a[0] - a_init) / (a_max - a_init));
+        let y_cur = f64::from(frame.ysize) * ((cycle.crack.a[0] - a_init) / (a_max - a_init));
         let newblock = if cycle.block > cblock {
             cblock = cycle.block.floor() + 1.0;
             true
@@ -149,12 +156,13 @@ pub fn write_svg_pseudo_image(history: &[History], frame: &ImageData, filename: 
         let color = (lightest - ave_color).max(0.0);
         let shade = (color * 16.0) as u8;
         let code = format!("#{:x}{:x}{:x}", shade, shade, shade);
+        // println!("Average colour {}", ave_color);
         let path = element::Rectangle::new()
             .set("fill", code)
             .set("stroke", 0)
             .set("y", 0)
             .set("x", y_prev)
-            .set("width", (y_cur - y_prev))
+            .set("width", y_cur - y_prev)
             .set("height", frame.xsize - 50);
 
         document = document.add(path);
@@ -177,7 +185,7 @@ pub fn write_svg_pseudo_image(history: &[History], frame: &ImageData, filename: 
     // add a micron bar every nbar spacings
     for b in 0..nbar {
         let bar_pos = b * frame.ysize as i32 / nbar;
-        let bar = element::Rectangle::new()
+        let bar_marker = element::Rectangle::new()
             .set("fill", "white")
             .set("stroke", 0)
             .set("y", frame.xsize - 40)
@@ -185,7 +193,7 @@ pub fn write_svg_pseudo_image(history: &[History], frame: &ImageData, filename: 
             .set("width", bar_pixels)
             .set("height", 10);
 
-        document = document.add(bar);
+        document = document.add(bar_marker);
     }
 
     // set the background to white

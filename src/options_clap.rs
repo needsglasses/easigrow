@@ -22,7 +22,7 @@ pub fn get_options_clap(line: &str, options: &mut EasiOptions) {
              .short("q")
              .long("seq_infile")
              .value_name("FILE")
-            .help("file of loading sequence for one block of loading. ")
+            .help("file of loading sequence for one block of loading")
              .takes_value(true))
         
         .arg(Arg::with_name("cycle_infile")
@@ -87,13 +87,13 @@ pub fn get_options_clap(line: &str, options: &mut EasiOptions) {
         .arg(Arg::with_name("forward")
              .long("forward")
              .value_name("DISTANCE")
-             .help("forward distance from crack origin to forward edge in 'a' direction of growth (default: infinite)")
+             .help("distance forwards from crack origin to free edge in 'a' direction of growth (default: infinite)")
              .takes_value(true))
         
         .arg(Arg::with_name("sideways")
              .long("sideways")
              .value_name("DISTANCE")
-             .help("sideways distance from crack origin to side edge in 'c' direction of growth (default: infinite)")
+             .help("distance sideways from crack origin to free edge in 'c' direction of growth (default: infinite)")
              .takes_value(true))
         
         .arg(Arg::with_name("radius")
@@ -189,13 +189,13 @@ pub fn get_options_clap(line: &str, options: &mut EasiOptions) {
         .arg(Arg::with_name("cycle_rem_big")
              .long("cycle_rem_big")
              .value_name("DELTA")
-             .help("remove cycles with range bigger than this")
+             .help("remove cycles with a range bigger than this")
              .takes_value(true))
 
         .arg(Arg::with_name("cycle_rem_small")
              .long("cycle_rem_small")
              .value_name("DELTA")             
-             .help("remove cycles with range smaller than this")
+             .help("remove cycles with a range smaller than this")
              .takes_value(true))
 
         .arg(Arg::with_name("cycle_deadband")
@@ -309,7 +309,7 @@ pub fn get_options_clap(line: &str, options: &mut EasiOptions) {
         .arg(Arg::with_name("opt_tol") 
              .long("opt_tol")
              .value_name("TOL")
-             .help("terminate optimisation when change in error function is less than this amount (default 1e-3)")
+             .help("terminate optimisation when the change in error function is less than this amount (default 1e-3)")
              .takes_value(true))
 
         .arg(Arg::with_name("opt_nelder") 
@@ -347,7 +347,7 @@ pub fn get_options_clap(line: &str, options: &mut EasiOptions) {
     } else {
         // get them from the string
         // add command word since it skips first argument
-        process.get_matches_from(("easigro ".to_string() + line).split(' '))
+        process.get_matches_from(("easigro ".to_string() + line.trim()).split(' '))
     };
 
     // basic crack growth options

@@ -49,7 +49,7 @@ pub fn sweep(options: &options::EasiOptions, params: &mut [f64]) -> f64 {
                 .sqrt();
             (normalised_factors, total_single_error)
         })
-        .collect_into(&mut results);
+        .collect_into_vec(&mut results);
 
     for &(f, r) in &results {
         println!("{:?} {:?}", f, r);
@@ -66,9 +66,8 @@ pub fn sweep(options: &options::EasiOptions, params: &mut [f64]) -> f64 {
     println!("    Normalised factors: {:?}", best_normalised_factors);
 
     // copy back the best parameters
-    for i in 0..params.len() {
-        params[i] = best_normalised_factors[i];
-    }
+    let n = params.len();
+    params.clone_from_slice(&best_normalised_factors[..n]);
 
     smallest_error
 }

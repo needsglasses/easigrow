@@ -5,6 +5,7 @@
 pub static COMMENT: &'static str = "#  ";
 
 extern crate svg;
+extern crate log;
 
 #[cfg(not(feature = "GSL"))]
 extern crate bspline;

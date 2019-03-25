@@ -7,6 +7,8 @@ use std::ops::Sub;
 use std;
 use std::iter::Iterator;
 
+use log::info;
+
 #[derive(Debug, Clone)]
 pub enum CycleMethod {
     Rainflow,
@@ -143,16 +145,12 @@ pub fn process_seq_mods(sequence: &[tag::Tag], seq_mods: &SequenceModifiers) -> 
         
     // remove smaller points
         .filter(|s| if let Some(min) = seq_mods.remove_smaller {
-            if s.value < min {
-                true
-            } else { false }
+            s.value < min 
         } else { true })
         
     // remove bigger points
         .filter(|s| if let Some(max) = seq_mods.remove_bigger {
-            if s.value > max {
-                true
-            } else { false }
+            s.value > max
         } else { true })
         
         .collect::<Vec<_>>()
@@ -202,7 +200,7 @@ pub fn sequence_from_cycles(cycles: &[Cycle<tag::Tag>]) -> Vec<tag::Tag> {
     let mut seq = Vec::with_capacity(max_index + 1);
 
     // initialise the sequence
-    for _ in 0..max_index + 1 {
+    for _ in 0..=max_index {
         seq.push(tag::Tag::new(0.0, max_index))
     }
 
@@ -271,7 +269,7 @@ fn between_eq<T: PartialOrd>(a: &T, b: &T, c: &T) -> bool {
 ///
 /// A closed rainflow cycle is any adjacent pair of turning points b,c that
 /// lie between turning points a and d
-///```
+///```ignore
 ///            d
 ///         b  /
 ///      \  /\/
@@ -287,7 +285,7 @@ fn between_eq<T: PartialOrd>(a: &T, b: &T, c: &T) -> bool {
 /// firstly be reordered.
 ///
 /// There seems to be no difference between range pair counting and
-/// rainflow counting. The same definitiion of a cycle as an
+/// rainflow counting. The same definition of a cycle as an
 /// intermediate cycle that lies between two turning points is a range
 /// pair or rainflow cycle.
 pub fn rainflow(seq: &[tag::Tag]) -> (Vec<Cycle<tag::Tag>>, Vec<tag::Tag>) {
@@ -353,7 +351,7 @@ fn single_pass_rainflow<T: PartialOrd + Clone + std::fmt::Debug>(
             }
         };
 
-        //        println!("between {:?} {:?} {:?} {:?}: {}", a,b,c,d, between_eq(a, b, d) && between_eq(a, c, d));
+        info!("between {:?} {:?} {:?} {:?}: {}", a,b,c,d, between_eq(a, b, d) && between_eq(a, c, d));
 
         if between_eq(a, b, d) && between_eq(a, c, d) {
             let cycle = Cycle::new(b.clone(), c.clone());
@@ -384,7 +382,7 @@ fn single_pass_rainflow<T: PartialOrd + Clone + std::fmt::Debug>(
     (cycles, leftovers)
 }
 
-/// Assign the cyles as simple tension cycles.
+/// Assign the cylces as simple tension cycles.
 ///
 ///  A tension cycle goes from a minimum to a maximum turning
 ///  point. Note: this routine needs some work to check the boundary
@@ -400,12 +398,8 @@ pub fn tension<T: PartialOrd + Clone>(tp_sequence: &[T]) -> (Vec<Cycle<T>>, Vec<
         1
     };
 
-    let mut seq = start..(start + tp_sequence.len() - 1);
-    loop {
-        let i = match seq.next() {
-            Some(i) => i,
-            None => break,
-        };
+    let mut seq = start..(tp_sequence.len() - 1);
+    while let Some(i) = seq.next() { 
         tension_cycles.push(Cycle::new(
             tp_sequence[i].clone(),
             tp_sequence[(i + 1)].clone(),
@@ -431,7 +425,7 @@ pub fn reorder_sequence<T: PartialOrd + Clone>(seq: &[T]) -> Vec<T> {
         rseq.push(seq[i].clone());
     }
 
-    for i in 0..start + 1 {
+    for i in 0..=start {
         rseq.push(seq[i].clone());
     }
 
@@ -520,13 +514,13 @@ Sequence Summary
         let max = seq.iter()
             .fold(seq[0], |m, p| if p.value > m.value { *p } else { m });
         let max_count = seq.iter()
-            .fold(0, |sum, s| sum + if max.value == s.value { 1 } else { 0 });
+            .fold(0, |sum, s| sum + if (max.value - s.value).abs() < std::f64::EPSILON { 1 } else { 0 });
         println!("Maximum: {:.4e} at line {}", max.value, max.index);
         println!("Number of times maximum occurs: {}", max_count);
         let min = seq.iter()
             .fold(seq[0], |m, p| if p.value < m.value { *p } else { m });
         let min_count = seq.iter()
-            .fold(0, |sum, s| sum + if min.value == s.value { 1 } else { 0 });
+            .fold(0, |sum, s| sum + if (min.value - s.value).abs() < std::f64::EPSILON { 1 } else { 0 });
         println!("Minimum: {:.4e} at line {}", min.value, min.index);
         println!("Number of times minimum occurs: {}", min_count);
         println!(
@@ -548,7 +542,7 @@ Sequence Summary
         println!("Number of non turning points: {}", seq.len() - tp.len());
         print!("Sequence: ");
         print_start_end(seq, 5);
-        println!("")
+        println!()
     }
 }
 
@@ -684,48 +678,52 @@ mod tests {
     #[test]
     fn long_check_turning_points() {
         let mut x = Vec::new();
-        let y = [0.0, 0.5, 1.0, 0.5];
+        let y = [0.0f64, 0.5, 1.0, 0.5];
+
         for _ in 0..100 {
             x.extend_from_slice(&y);
         }
+
         assert_eq!(turning_points(&x).len(), 201);
     }
 
-    #[test]
-    fn long_check_rainflow() {
-        let mut x = Vec::new();
-        let y = [0.0f64, 0.5, 0.25, 1.0, 0.5];
-        for _ in 0..3 {
-            x.extend_from_slice(&y);
-        }
-        let tp = turning_points(&x);
-        let tps = tp.iter().map(|&a| a).collect::<Vec<f64>>();
-        let (rf, _unclosed) = super::unsorted_rainflow(&tps);
-        println!("Unfiltered sequence {:?}", rf);
+    // #[test]
+    // fn long_check_rainflow() {
+    //     let mut x = Vec::new();
+    //     let y = [0.0f64, 0.5, 0.25, 1.0, 0.5];
 
-        // risefall and deadband filtering
-        let risefall = rf.iter()
-            .filter(|&cycle| cycle.range() > 0.5)
-            .collect::<Vec<_>>();
-        let deadband = rf.iter()
-            .filter(|cycle| !cycle.within(0.5, 0.0))
-            .collect::<Vec<_>>();
+    //     for _ in 0..3 {
+    //         x.extend_from_slice(&y);
+    //     }
 
-        let both = rf.iter()
-            .filter(|&cycle| cycle.range() > 0.5)
-            .filter(|cycle| !cycle.within(0.5, 0.0))
-            .collect::<Vec<_>>();
+    //     let tp = turning_points(&x);
+    //     let tps = tp.iter().cloned();
+    //     let (rf, _unclosed) = super::unsorted_rainflow(&tps);
+    //     println!("Unfiltered sequence {:?}", rf);
 
-        println!("risefall 0.5 sequence {:?}", risefall);
-        println!("deadband [0.0, 0.5] sequence {:?}", deadband);
-        println!("risefall and deadband sequence {:?}", both);
+    //     // risefall and deadband filtering
+    //     let risefall = rf.iter()
+    //         .filter(|&cycle| cycle.range() > 0.5)
+    //         .collect::<Vec<_>>();
 
-        //    assert_eq!(turning_points(&x).len(), 201);
-    }
+    //     let deadband = rf.iter()
+    //         .filter(|cycle| !cycle.within(0.5, 0.0))
+    //         .collect::<Vec<_>>();
+
+    //     let both = rf.iter()
+    //         .filter(|&cycle| cycle.range() > 0.5)
+    //         .filter(|cycle| !cycle.within(0.5, 0.0))
+    //         .collect::<Vec<_>>();
+
+    //     println!("risefall 0.5 sequence {:?}", risefall);
+    //     println!("deadband [0.0, 0.5] sequence {:?}", deadband);
+    //     println!("risefall and deadband sequence {:?}", both);
+
+    // }
 
     #[test]
     fn check_tag_turning_points() {
-        let s0 = tag::Tag::from(&vec![0.0, 1.0, 1.0, 4.0, 3.0, 5.0, 2.0, 0.0]);
+        let s0 = tag::Tag::from(&[0.0, 1.0, 1.0, 4.0, 3.0, 5.0, 2.0, 0.0]);
         let ans0 = vec![
             tag::Tag::new(0.0, 0),
             tag::Tag::new(4.0, 3),
@@ -734,26 +732,26 @@ mod tests {
             tag::Tag::new(0.0, 7),
         ];
 
-        let s1 = tag::Tag::from(&vec![1.0, 0.0, 0.0, -1.0, 0.0, 0.0, 1.0]);
+        let s1 = tag::Tag::from(&[1.0, 0.0, 0.0, -1.0, 0.0, 0.0, 1.0]);
         let ans1 = vec![
             tag::Tag::new(1.0, 0),
             tag::Tag::new(-1.0, 3),
             tag::Tag::new(1.0, 6),
         ];
 
-        let s2 = tag::Tag::from(&vec![1.0, 0.0, 0.0, -1.0, -2.0, 0.0, 0.0, 1.0]);
-        let ans2 = tag::Tag::from(&vec![1.0, -2.0, 1.0]);
+        let s2 = tag::Tag::from(&[1.0, 0.0, 0.0, -1.0, -2.0, 0.0, 0.0, 1.0]);
+        let ans2 = tag::Tag::from(&[1.0, -2.0, 1.0]);
 
-        let s3 = tag::Tag::from(&vec![1.0, 1.5, 2.0, 2.5, 1.5, 1.0]);
-        let ans3 = tag::Tag::from(&vec![1.0, 2.5, 1.0]);
+        let s3 = tag::Tag::from(&[1.0, 1.5, 2.0, 2.5, 1.5, 1.0]);
+        let ans3 = tag::Tag::from(&[1.0, 2.5, 1.0]);
 
-        let s4 = tag::Tag::from(&vec![1.0, 1.0, 1.0, 1.0, 1.0, 1.0]);
-        let ans4 = tag::Tag::from(&vec![1.0, 1.0]);
+        let s4 = tag::Tag::from(&[1.0, 1.0, 1.0, 1.0, 1.0, 1.0]);
+        let ans4 = tag::Tag::from(&[1.0, 1.0]);
 
-        let s5 = tag::Tag::from(&vec![1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0]);
-        let ans5 = tag::Tag::from(&vec![1.0, 0.0, 1.0]);
+        let s5 = tag::Tag::from(&[1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0]);
+        let ans5 = tag::Tag::from(&[1.0, 0.0, 1.0]);
 
-        //    let s6 = tag::Tag::from(&vec![0.0]); // this should fail
+        //    let s6 = tag::Tag::from(&[0.0]); // this should fail
 
         let seqs = [s0, s1, s2, s3, s4, s5];
         let ans = [ans0, ans1, ans2, ans3, ans4, ans5];
@@ -832,7 +830,7 @@ mod tests {
 
     #[test]
     fn check_process_seq_mods() {
-        let sequence = tag::Tag::from(&vec![0.0f64, 3.0, 2.0, 5.0, 3.0, 5.0, 4.0, 0.0]);
+        let sequence = tag::Tag::from(&[0.0f64, 3.0, 2.0, 5.0, 3.0, 5.0, 4.0, 0.0]);
 
         let mods = SequenceModifiers {
             cap_max: Some(3.0),
@@ -846,7 +844,7 @@ mod tests {
         };
 
         let mod_sequence = process_seq_mods(&sequence, &mods);
-        let correct_seq = tag::Tag::from(&vec![0.0f64, 3.0, 2.0, 3.0, 3.0, 3.0, 3.0, 0.0]);
+        let correct_seq = tag::Tag::from(&[0.0f64, 3.0, 2.0, 3.0, 3.0, 3.0, 3.0, 0.0]);
         assert_eq!(correct_seq, mod_sequence);
     }
 }
