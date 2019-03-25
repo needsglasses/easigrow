@@ -13,11 +13,9 @@ The version number has also been reset to 0.0.0.
 
 ## Features
 
-- Calculates the crack growth size 
-- choice of beta models
-- choice of material properties
-- choice of crack growth equations
-- optimises model coefficients to match data
+- Calculates the crack growth size
+- Choice of beta models, material properties and crack growth equations
+- Optimises model coefficients to match data
 - Generates a psuedo image of the crack growth patterns
 
 ## Getting started
@@ -49,12 +47,11 @@ Documentation is hosted
 [here](http://needsglasses.github.io/easigrow), and separated into
 multiple parts:
 
-- The [user manual][user_manual] 
-  Use this document if you want to use Easigrow as a command line tool
+- Run 'easigrow --help'
+  if you want to use Easigrow as a command line tool
   without writing code.
-- To use Easigrow as a library inside your own code, we have a [developer
-  documentation][devdoc], which contains documentation for all the library
-  public functions.
+- Run 'Cargo doc' to use Easigrow as a library inside your own code
+  and generate documentation for all the library public functions.
 
 ### Installation as a command line tool
 
