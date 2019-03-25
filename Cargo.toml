@@ -4,7 +4,7 @@ name = "easigrow"
 version = "0.0.0"
 description = "A fatigue crack growth matching program"
 license = "MIT"
-authors = ["Paul White <paul.white.melb@gmail.com>"]
+authors = ["Paul White @needsglasses"]
 readme = "README.md"
 documentation = "README"
 publish = false
@@ -18,12 +18,12 @@ name = "easigrow"
 path = "src/main.rs"
 
 [dependencies]
-clap = "*"
-rayon = "*"
-svg = "*"
+clap = "2.32.0"
+rayon = "1.0.3"
+svg = "0.5.12"
 clippy = {version = "*", optional = true}
 GSL = {version = "*", optional = true}
-bspline = "*"
+bspline = "0.2.2"
 
 [dev-dependencies]
 tempdir = "0.3"
