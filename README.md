@@ -41,7 +41,7 @@ pre-existing building blocks. Here is a simple example of growing a crack from t
     300.0000  6.635652e-4 
     301.5985  7.468295e-4 
 #  Failure Event: a[0.0007468294682320596, 0.001000259809490663] >= a_limit[0.001, 0.001]
-'''
+```
 
 ### Documentation
 
