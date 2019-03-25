@@ -43,14 +43,12 @@ pre-existing building blocks. Here is a simple example of growing a crack from t
 
 ### Documentation
 
-Documentation is hosted
-[here](http://needsglasses.github.io/easigrow), and separated into
-multiple parts:
+There are two sources of documentation:
 
-- Run 'easigrow --help'
+- Run `easigrow --help`
   if you want to use Easigrow as a command line tool
   without writing code.
-- Run 'Cargo doc' to use Easigrow as a library inside your own code
+- Run `Cargo doc` to use Easigrow as a library inside your own code
   and generate documentation for all the library public functions.
 
 ### Installation as a command line tool
