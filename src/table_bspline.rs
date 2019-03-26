@@ -1,5 +1,7 @@
 /// Tables with spline interpolation using the bspline library
 
+use log::debug;
+
 use bspline;
 use table::nearest;
 
@@ -15,16 +17,18 @@ pub struct PairTable {
 }
 
 impl PairTable {
-    pub fn new(columns: Vec<f64>, rows: Vec<Vec<f64>>, values: Vec<Vec<f64>>) -> PairTable {
+    pub fn new(columns: Vec<f64>,
+               rows: Vec<Vec<f64>>,
+               values: Vec<Vec<f64>>) -> PairTable {
         let mut splines = Vec::new();
         let degree = 2;
-        //        println!("Hello there");
-        //        println!("columns: {:?}", columns);
-        //        println!("rows: {:?}", rows);
-        //        println!("values: {:?}", values);
+        debug!("PairTable::new()");
+        debug!("columns: {:?}", columns);
+        debug!("rows: {:?}", rows);
+        debug!("values: {:?}", values);
+
         // make a spline for every set of row and column
         for i in 0..columns.len() {
-            //            let n = row[i].len() + degree + 1;
             let mut knots = Vec::new();
             let start = rows[i][0];
             knots.push(start);
@@ -38,8 +42,8 @@ impl PairTable {
             let mut v = values[i].clone();
 
             points.append(&mut v);
-
-            //            println!("Knots are: {:?}", knots);
+            
+            debug!("Knots are: {:?}", knots);
             let spline = bspline::BSpline::new(degree, points, knots);
             splines.push(spline);
         }
@@ -69,35 +73,35 @@ impl PairTable {
     /// column variables are capped to be the maximum or minimum values
     /// in the table.
     pub fn interp(&self, row: f64, column: f64) -> f64 {
-        println!("New interpolation row: {}, column: {}", row, column);
+        debug!("New interpolation row: {}, column: {}", row, column);
         let col_limited = column
             .max(self.columns[0])
             .min(self.columns[(self.columns.len() - 1)]);
         let col_low = nearest(col_limited, &self.columns);
         let row_limited = row.max(self.rows[col_low][0])
             .min(self.rows[col_low][(self.rows[col_low].len() - 1)]);
-               println!("Col limited {:?}, row limited {:?}", col_limited, row_limited );
-               println!("col {}", col_low);
+               debug!("Col limited {:?}, row limited {:?}", col_limited, row_limited );
+               debug!("col {}", col_low);
 
-               println!("Columns: {:?}", self.columns);
-               println!("interp for {} using col {}", row, col_low);
-               println!("knot domain {:?}", self.splines[col_low].knot_domain());
+               debug!("Columns: {:?}", self.columns);
+               debug!("interp for {} using col {}", row, col_low);
+               debug!("knot domain {:?}", self.splines[col_low].knot_domain());
 
         let row_s = self.splines[col_low].point(row_limited);
-               println!("done interp row_s {}", row_s);
+        debug!("done interp row_s {}", row_s);      
+        debug!("No. of columns {}", self.columns.len());
 
-               println!("No. of columns {}", self.columns.len());
         // simple linear interpolation between the lower and upper columns
         if self.columns.len() > 1 {
-            //            println!("End interpolation");
+            debug!("End interpolation");
             let row_limited = row.max(self.rows[col_low + 1][0])
                 .min(self.rows[col_low + 1][(self.rows[col_low + 1].len() - 1)]);
             let row_e = self.splines[col_low + 1].point(row_limited);
-            //            println!("done interp row_e {:?}", row_e);
+            debug!("done interp row_e {:?}", row_e);
             let interp = ((column - self.columns[col_low])
                 / (self.columns[col_low + 1] - self.columns[col_low]))
                 * (row_e - row_s) + row_s;
-            //            println!("interp result: {}", interp);
+            debug!("interp result: {}", interp);
             interp
         } else {
             row_s

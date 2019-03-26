@@ -49,33 +49,34 @@ impl PairTable {
     /// column variables are capped to be the maximum or minimum values
     /// in the table.
     pub fn interp(&self, row: f64, column: f64) -> f64 {
-        //        println!("New interpolation row: {}, column: {}", row, column);
+        debug!("New interpolation row: {}, column: {}", row, column);
         let col_limited = column
             .max(self.columns[0])
             .min(self.columns[(self.columns.len() - 1)]);
         let col_low = table::nearest(col_limited, &self.columns);
         let row_limited = row.max(self.rows[col_low][0])
             .min(self.rows[col_low][(self.rows[col_low].len() - 1)]);
-        //        println!("Col limited {:?}, row limited {:?}", col_limited, row_limited );
-        //        println!("col {}", col_low);
+        debug!("Col limited {:?}, row limited {:?}", col_limited, row_limited );
+        debug!("col {}", col_low);
         let mut accel = rgsl::InterpAccel::new();
 
-        //        println!("Columns: {:?}", self.columns);
-        //        println!("interp for {} using col {}", row, col_low);
+        debug!("Columns: {:?}", self.columns);
+        debug!("interp for {} using col {}", row, col_low);
         let row_s = self.splines[col_low].eval(row_limited, &mut accel);
-        //        println!("done interp row_s {}", row_s);
+        debug!("done interp row_s {}", row_s);
+
         // simple linear interpolation between the lower and upper columns
         if self.columns.len() > 1 {
-            //            println!("End interpolation");
+            debug!("End interpolation");
             let mut accel = rgsl::InterpAccel::new();
             let row_limited = row.max(self.rows[col_low + 1][0])
                 .min(self.rows[col_low + 1][(self.rows[col_low + 1].len() - 1)]);
             let row_e = self.splines[col_low + 1].eval(row_limited, &mut accel);
-            //            println!("done interp row_e {}", row_e);
+            debug!("done interp row_e {}", row_e);
             let interp = ((column - self.columns[col_low])
                 / (self.columns[col_low + 1] - self.columns[col_low]))
                 * (row_e - row_s) + row_s;
-            //            println!("interp result: {}", interp);
+            debug!("interp result: {}", interp);
             interp
         } else {
             row_s

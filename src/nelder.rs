@@ -6,6 +6,7 @@
 // We use this crate to allow us to add and multiply vectors to keep it in line with python.
 // similar to nalgebra but nalgrebra requires way too many subcrates
 use vector::MVector;
+use log::{info, warn};
 
 /// A point on the simplex.
 #[derive(Debug, Clone)]
@@ -113,7 +114,7 @@ where
         });
     }
     if verbose {
-        println!("Nelder: starting result {:?}", results)
+        info!("Nelder: starting result {:?}", results)
     };
 
     let mut prev_best = results[0].score;
@@ -123,7 +124,7 @@ where
     loop {
         // Check if exceeding the iteration limit.
         if iter >= max_iter {
-            println!("***Warning: The optimisation has failed to converge within the specified maximum iteration limit {}. 
+            info!("***Warning: The optimisation has failed to converge within the specified maximum iteration limit {}. 
 The answer may not be optimum. Try increasing the limit.", max_iter);
             break;
         }
@@ -131,22 +132,22 @@ The answer may not be optimum. Try increasing the limit.", max_iter);
 
         results.sort_by(|a, b| a.score.partial_cmp(&b.score).unwrap());
         if verbose {
-            println!("Nelder: {} {}. best: {}", iter, n, results[0].score);
+            info!("Nelder: {} {}. best: {}", iter, n, results[0].score);
         };
 
         // check for convergence
         let change_tol = (results[0].score - results[n - 1].score).abs();
         if change_tol < converge_tol {
             if verbose {
-                println!("Nelder: Success. Converged tol {}", change_tol);
+                info!("Nelder: Success. Converged tol {}", change_tol);
             }
             break;
         } else {
             if verbose {
-                println!("Nelder: convergence tolerance not reached {}", change_tol);
+                info!("Nelder: convergence tolerance not reached {}", change_tol);
             }
             if verbose {
-                println!(
+                info!(
                     "Nelder: best {}, worst {}, prev_best {}",
                     results[0].score,
                     results[results.len() - 1].score,
@@ -168,12 +169,12 @@ The answer may not be optimum. Try increasing the limit.", max_iter);
         // let rscore = f(xr.as_ref());
         let rscore = f(xr.as_slice());
         if verbose {
-            println!("Nelder: rscore: {}", rscore);
+            info!("Nelder: rscore: {}", rscore);
         }
         if rscore >= results[0].score && results[n - 2].score > rscore {
             ops.push(Operation::Reflection);
             if verbose {
-                println!("Nelder: Including reflected point");
+                info!("Nelder: Including reflected point");
             }
             results.pop().unwrap();
             results.push(Result {
@@ -191,7 +192,7 @@ The answer may not be optimum. Try increasing the limit.", max_iter);
             // let escore = f(xe.as_ref());
             let escore = f(xe.as_slice());
             if verbose {
-                println!("Nelder: expansion score: {}", escore);
+                info!("Nelder: expansion score: {}", escore);
             }
             results.pop().unwrap();
 
@@ -220,7 +221,7 @@ The answer may not be optimum. Try increasing the limit.", max_iter);
 
         if cscore < results[n - 1].score {
             if verbose {
-                println!("contracting: {}", cscore);
+                info!("contracting: {}", cscore);
             }
             ops.push(Operation::Contraction);
             results.pop().unwrap();
@@ -236,7 +237,7 @@ The answer may not be optimum. Try increasing the limit.", max_iter);
         // xi = x1 + sigma(xi - x)
         // This is a shrinking of the simplex around the best point
         if verbose {
-            println!("Nelder: reducing");
+            info!("Nelder: reducing");
         }
         ops.push(Operation::Reduction);
         for r in 1..results.len() {
@@ -247,16 +248,16 @@ The answer may not be optimum. Try increasing the limit.", max_iter);
         }
     }
 
-    println!("Nelder: Iterations: {}", iter);
+    info!("Nelder: Iterations: {}", iter);
     let count = count_nelder_ops(&ops);
-    println!(
+    info!(
         "Nelder: Operations: reflection {}, expansion {}, contraction {}, reduction {}",
         count.reflection, count.expansion, count.contraction, count.reduction
     );
     for (i, &a) in results[0].x.clone().as_slice().to_vec().iter().enumerate() {
         x[i] = a;
     }
-    println!("nelder x: {:?}", x);
+    info!("nelder x: {:?}", x);
     results[0].score
 }
 
@@ -293,16 +294,16 @@ fn count_nelder_ops(ops: &[Operation]) -> NelderSum {
 fn check_nelder_limits(params: &Nelder) {
     // recommended parameter limits (wikipedia)
     if params.gamma < 0.0 {
-        println!("***Warning: Wikipedia recommends using a Nelder-Mead value for gamma > 0.0, using {} .", params.gamma);
+        warn!("***Warning: Wikipedia recommends using a Nelder-Mead value for gamma > 0.0, using {} .", params.gamma);
     }
     if { params.rho < 0.0 } | { params.rho > 0.5 } {
-        println!(
+        warn!(
             "***Warning: Wikipedia recommends using a Nelder-Mead value 0.0 < rho < 0.5, using {}.",
             params.rho
         );
     }
     if params.sigma < 0.0 {
-        println!(
+        warn!(
             "***Warning: Wikipedia recommends using a Nelder-Mead value for sigma > 0.0, using {}.",
             params.sigma
         );
@@ -359,7 +360,7 @@ mod tests {
                 score: 0.0,
             },
         ];
-        println!("centroid: {:?}", centroid(&x));
+        info!("centroid: {:?}", centroid(&x));
 
         let mut x = vec![1.0f64, 2.0, 3.0];
 
@@ -378,8 +379,8 @@ mod tests {
             100,
         );
 
-        println!("Start result: {}", f_x);
-        println!("Optimimum result: {:?} at x: {:?}", result, x);
+        info!("Start result: {}", f_x);
+        info!("Optimimum result: {:?} at x: {:?}", result, x);
         assert!((result + 1.0).abs() < 0.01);
     }
 
@@ -402,8 +403,8 @@ mod tests {
             100,
         );
 
-        println!("Start result: {}", f_x);
-        println!("Optimimum result: {:?} at x: {:?}", result, x);
+        info!("Start result: {}", f_x);
+        info!("Optimimum result: {:?} at x: {:?}", result, x);
 
         assert!((result).abs() < 0.01);
         assert!(x.iter().fold(0.0, |s, x| s + (x - 1.0).powi(2)) < 0.001);
@@ -440,14 +441,14 @@ mod tests {
                 100,
             );
 
-            println!("Start result: {}", f_x);
-            println!("Optimimum result: {:?} at x: {:?}", result, y);
+            info!("Start result: {}", f_x);
+            info!("Optimimum result: {:?} at x: {:?}", result, y);
 
             assert!((result).abs() < 1e-5);
             let vec_error = y.iter()
                 .zip(ans.iter())
                 .fold(0.0, |s, (x, a)| s + (x - a).powi(2));
-            println!(
+            info!(
                 "vecs error {}, answer {:?} obtained {:?}",
                 vec_error, ans, y
             );
