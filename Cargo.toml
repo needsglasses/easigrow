@@ -9,15 +9,16 @@ readme = "README.md"
 documentation = "README"
 publish = false
 
-[lib]
-name = "fatigue"
-path = "src/lib.rs"
-
 [[bin]]
 name = "easigrow"
 path = "src/main.rs"
 
+[lib]
+name = "fatigue"
+path = "src/lib.rs"
+
 [dependencies]
+log = "0.4"
 clap = "2.32.0"
 rayon = "1.0.3"
 svg = "0.5.12"
