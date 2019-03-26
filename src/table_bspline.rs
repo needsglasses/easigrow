@@ -13,7 +13,7 @@ pub struct PairTable {
     /// vectors of columns
     pub values: Vec<Vec<f64>>,
     /// Splines
-    splines: Vec<bspline::BSpline<f64>>,
+    splines: Vec<bspline::BSpline<f32>>,
 }
 
 impl PairTable {
@@ -31,19 +31,20 @@ impl PairTable {
         for i in 0..columns.len() {
             let mut knots = Vec::new();
             let start = rows[i][0];
-            knots.push(start);
-            knots.push(start);
-            let mut t = rows[i].clone();
+            knots.push(start as f32);
+            knots.push(start as f32);
+//            let mut t = rows[i].clone() ;
+            let mut t = rows[i].iter().map(|&e| e as f32).collect() ;
             knots.append(&mut t);
             let end = knots[knots.len() - 1];
             knots.push(end.clone());
 
             let mut points = Vec::new();
-            let mut v = values[i].clone();
+            let mut v = values[i].iter().map(|&e| e as f32).collect();
 
             points.append(&mut v);
             
-            debug!("Knots are: {:?}", knots);
+            println!("Knots are: {:?}", knots);
             let spline = bspline::BSpline::new(degree, points, knots);
             splines.push(spline);
         }
@@ -87,7 +88,7 @@ impl PairTable {
                debug!("interp for {} using col {}", row, col_low);
                debug!("knot domain {:?}", self.splines[col_low].knot_domain());
 
-        let row_s = self.splines[col_low].point(row_limited);
+        let row_s = self.splines[col_low].point(row_limited as f32) as f64;
         debug!("done interp row_s {}", row_s);      
         debug!("No. of columns {}", self.columns.len());
 
@@ -96,7 +97,7 @@ impl PairTable {
             debug!("End interpolation");
             let row_limited = row.max(self.rows[col_low + 1][0])
                 .min(self.rows[col_low + 1][(self.rows[col_low + 1].len() - 1)]);
-            let row_e = self.splines[col_low + 1].point(row_limited);
+            let row_e = self.splines[col_low + 1].point(row_limited as f32) as f64;
             debug!("done interp row_e {:?}", row_e);
             let interp = ((column - self.columns[col_low])
                 / (self.columns[col_low + 1] - self.columns[col_low]))
@@ -104,7 +105,7 @@ impl PairTable {
             debug!("interp result: {}", interp);
             interp
         } else {
-            row_s
+            row_s as f64
         }
     }
 }
