@@ -89,7 +89,6 @@ pub fn nelder_mead<F>(
 where
     F: Fn(&[f64]) -> f64,
 {
-    let verbose = true;
     check_nelder_limits(params);
 
     let x_start = MVector::from_row_slice(x.len(), x);
@@ -113,9 +112,7 @@ where
             score: f(x_init.as_slice()),
         });
     }
-    if verbose {
-        info!("Nelder: starting result {:?}", results)
-    };
+    info!("Nelder: starting result {:?}", results)
 
     let mut prev_best = results[0].score;
     let mut iter = 0;
@@ -124,36 +121,28 @@ where
     loop {
         // Check if exceeding the iteration limit.
         if iter >= max_iter {
-            info!("***Warning: The optimisation has failed to converge within the specified maximum iteration limit {}. 
+            warn!("***Warning: The optimisation has failed to converge within the specified maximum iteration limit {}. 
 The answer may not be optimum. Try increasing the limit.", max_iter);
             break;
         }
         iter += 1;
 
         results.sort_by(|a, b| a.score.partial_cmp(&b.score).unwrap());
-        if verbose {
-            info!("Nelder: {} {}. best: {}", iter, n, results[0].score);
-        };
+        info!("Nelder: {} {}. best: {}", iter, n, results[0].score);
 
         // check for convergence
         let change_tol = (results[0].score - results[n - 1].score).abs();
         if change_tol < converge_tol {
-            if verbose {
-                info!("Nelder: Success. Converged tol {}", change_tol);
-            }
+            info!("Nelder: Success. Converged tol {}", change_tol);
             break;
         } else {
-            if verbose {
-                info!("Nelder: convergence tolerance not reached {}", change_tol);
-            }
-            if verbose {
-                info!(
-                    "Nelder: best {}, worst {}, prev_best {}",
-                    results[0].score,
-                    results[results.len() - 1].score,
-                    prev_best
-                );
-            }
+            info!("Nelder: convergence tolerance not reached {}", change_tol);
+            info!(
+                "Nelder: best {}, worst {}, prev_best {}",
+                results[0].score,
+                results[results.len() - 1].score,
+                prev_best
+            );
         }
 
         prev_best = results[0].score;
@@ -168,14 +157,12 @@ The answer may not be optimum. Try increasing the limit.", max_iter);
         let xr = x0.clone() + params.alpha * (x0.clone() - results[n - 1].x.clone());
         // let rscore = f(xr.as_ref());
         let rscore = f(xr.as_slice());
-        if verbose {
-            info!("Nelder: rscore: {}", rscore);
-        }
+        info!("Nelder: rscore: {}", rscore);
+
         if rscore >= results[0].score && results[n - 2].score > rscore {
             ops.push(Operation::Reflection);
-            if verbose {
-                info!("Nelder: Including reflected point");
-            }
+            info!("Nelder: Including reflected point");
+
             results.pop().unwrap();
             results.push(Result {
                 x: xr,
@@ -191,9 +178,8 @@ The answer may not be optimum. Try increasing the limit.", max_iter);
             let xe = x0.clone() + params.gamma * (xr.clone() - x0.clone());
             // let escore = f(xe.as_ref());
             let escore = f(xe.as_slice());
-            if verbose {
-                info!("Nelder: expansion score: {}", escore);
-            }
+            info!("Nelder: expansion score: {}", escore);
+
             results.pop().unwrap();
 
             if escore < rscore {
@@ -220,9 +206,8 @@ The answer may not be optimum. Try increasing the limit.", max_iter);
         let cscore = f(xc.as_slice());
 
         if cscore < results[n - 1].score {
-            if verbose {
-                info!("contracting: {}", cscore);
-            }
+            info!("contracting: {}", cscore);
+
             ops.push(Operation::Contraction);
             results.pop().unwrap();
             results.push(Result {
@@ -236,9 +221,8 @@ The answer may not be optimum. Try increasing the limit.", max_iter);
         // For all but the best point, replace the point with
         // xi = x1 + sigma(xi - x)
         // This is a shrinking of the simplex around the best point
-        if verbose {
-            info!("Nelder: reducing");
-        }
+        info!("Nelder: reducing");
+
         ops.push(Operation::Reduction);
         for r in 1..results.len() {
             results[r].x =

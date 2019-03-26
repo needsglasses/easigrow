@@ -22,7 +22,8 @@ The version number has also been reset to 0.0.0.
 
 Easigrow provides both a command line tool for running simulations;
 and a Rust library for writing your own algorithms using the
-pre-existing building blocks. Here is a simple example of growing a crack from the command line:
+pre-existing building blocks. Here is a simple example of growing a
+crack from the command line:
 
 ```bash
 ./target/debug/easigro -q sequences/seq1.txt -s 300 -n 100
