@@ -20,7 +20,6 @@ path = "src/lib.rs"
 [dependencies]
 env_logger = "0.6.1"
 log = "0.4"
-env_logger = "*"
 clap = "2.32.0"
 rayon = "1.0.3"
 svg = "0.5.12"
