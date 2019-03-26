@@ -112,7 +112,7 @@ where
             score: f(x_init.as_slice()),
         });
     }
-    info!("Nelder: starting result {:?}", results)
+    info!("Nelder: starting result {:?}", results);
 
     let mut prev_best = results[0].score;
     let mut iter = 0;
@@ -297,6 +297,7 @@ fn check_nelder_limits(params: &Nelder) {
 #[cfg(test)]
 mod tests {
     use vector::MVector;
+    use log::info;
 
     use super::{centroid, nelder_mead};
     use super::{Nelder, Result};

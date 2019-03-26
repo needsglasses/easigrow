@@ -1,4 +1,5 @@
 extern crate rgsl; // used for spline interpolation of table
+use log::debug;
 
 use table;
 

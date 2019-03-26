@@ -86,9 +86,11 @@ fn main() {
     get_options_clap("", &mut options);
     println!("{}easiGro: version {}", COMMENT, crate_version!());
     println!("{}", COMMENT);
-    println!("{}Options: ", COMMENT);
-    println!("{}", options);
-
+    if options.verbosity == options::Verbosity::Verbose {
+        println!("{}Options: ", COMMENT);
+        println!("{}", options);
+    }
+    
     options::read_all_files(&mut options);
 
     // process all the modifications to the sequence
