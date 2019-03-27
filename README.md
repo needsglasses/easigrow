@@ -20,14 +20,14 @@ The version number has also been reset to 0.0.0.
 
 ## Getting started
 
-Easigrow provides both a command line tool for running simulations;
+Easigrow provides both a command line tool for running simulations
 and a Rust library for writing your own algorithms using the
 pre-existing building blocks.
 
 Here is a simple example of growing a crack from the command line:
 
 ```bash
-./target/release/easigrow -q sequences/seq1.txt -s 300 -n 100
+./target/release/easigrow -q seq2.txt -s 300 -n 100
 
 #  easigrow: version 0.0.0
 #  
@@ -36,16 +36,16 @@ Here is a simple example of growing a crack from the command line:
 ...
        block            a 
       0.0000  1.000000e-5 
-    100.0000  1.514032e-5 
-    200.0000  4.002745e-5 
-    300.0000  6.635652e-4 
-    301.5985  7.468295e-4 
-#  Failure Event: a[0.0007468294682320596, 0.001000259809490663] >= a_limit[0.001, 0.001]
+    100.0000  2.189452e-5 
+    200.0000  5.234739e-4 
+    204.0975  7.473615e-4 
+#  Failure Event: a[0.0007473615299278992, 0.0010002610857908832] >= a_limit[0.001, 0.001]
 ```
 
 ### Documentation
 
-There are two sources of documentation:
+In addition to the above mentioned report, there are two further
+sources of documentation:
 
 - Run `easigrow --help`
   if you want to use Easigrow as a command line tool
@@ -61,7 +61,7 @@ yet. Then, you can download the code, build it and install it by running:
 cargo install --git https://github.com/needsglasses/easigrow
 ```
 
-This will produce the a `easigrow` binary in `~/.cargo/bin`.
+This will produce the `easigrow` binary in `~/.cargo/bin`.
 
 ### Usage as a library
 

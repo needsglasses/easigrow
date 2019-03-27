@@ -44,7 +44,7 @@ impl PairTable {
 
             points.append(&mut v);
             
-            println!("Knots are: {:?}", knots);
+            debug!("Knots are: {:?}", knots);
             let spline = bspline::BSpline::new(degree, points, knots);
             splines.push(spline);
         }

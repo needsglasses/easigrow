@@ -321,7 +321,7 @@ fn optimise_error(options: &options::EasiOptions, mut factors: &mut [f64]) {
 // help.
 fn generate_crack_history(options: &options::EasiOptions, params: &[f64]) -> Vec<grow::History> {
     let dadn_eqn = dadn::make_model(&options.dadn, &params, String::from("unknown"));
-    println!("{}da/dn equation: {}", COMMENT, dadn_eqn);
+    println!("{}da/dN equation: {}", COMMENT, dadn_eqn);
 
     let beta = beta::get_beta_fn(&options.beta, &options.component);
 

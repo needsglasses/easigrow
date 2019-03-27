@@ -244,7 +244,7 @@ impl White {
 
 impl DaDn for White {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut _e = writeln!(f, "{:?}", self);
+        let mut _e = writeln!(f, "{:#?}", self);
         write!(f, 
 "#  da/dN ({units}) = exp[({a:e} * ΔKeff^3 - {b:e} * ΔKeff^2 + {c:e} * ΔKeff - {d:e}) 
 #              + (dkic - ΔK)^{f}] [White14:{cite}]
