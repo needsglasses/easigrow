@@ -2,6 +2,7 @@ use fatigue::{cycle, fracto, tag};
 use options::{EasiOptions, OptimMethod, TerminatingOutput, Verbosity};
 use nelder::Nelder;
 use clap::{App, AppSettings, Arg};
+use log::error;
 
 /// Get the options from the command line.
 pub fn get_options_clap(line: &str, options: &mut EasiOptions) {
@@ -380,7 +381,10 @@ pub fn get_options_clap(line: &str, options: &mut EasiOptions) {
         options.cycle_method = match cycle_method {
             "rainflow" => cycle::CycleMethod::Rainflow,
             "tension" => cycle::CycleMethod::Tension,
-            _ => panic!("unknown cycle method"),
+            _ => { error!("Error: unknown cycle counting method");
+                   std::process::exit(2);
+            },
+
         };
     }
 
