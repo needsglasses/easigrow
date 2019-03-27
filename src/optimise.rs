@@ -319,7 +319,8 @@ fn compare_growth(
 
         // check if we do not grow the crack from a small enough size
         if history.is_empty() {
-            panic!("Zero length crack growth history");
+            error!("Error: Zero length crack growth history");
+            std::process::exit(2)
         }
 
         if history[0].crack.a[0] - history[0].da[0] > measured[i].a {
