@@ -1,7 +1,4 @@
 target
 *~
 Cargo.lock
-docs
 testing
-data
-todo
