@@ -44,13 +44,14 @@ Here is a simple example of growing a crack from the command line:
 
 ### Documentation
 
-In addition to the above mentioned report, there are two further
+In addition to the above mentioned report, there are additional
 sources of documentation:
 
 - Run `easigrow --help`
   if you want to use Easigrow as a command line tool
   without writing code.
 - Run `Cargo doc` to generate documentation for all the library public functions and use Easigrow as a library inside your own code.
+- Examples of use in the `doc` directory
 
 ### Installation as a command line tool
 
