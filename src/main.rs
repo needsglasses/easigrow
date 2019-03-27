@@ -53,6 +53,7 @@ use fatigue::COMMENT;
 use std::error::Error;
 use std::fs::File;
 use std::path::Path;
+use log::error;
 use std::io::Write;
 
 extern crate log;
@@ -98,7 +99,7 @@ fn main() {
 
     // Get the cycles from either the external sequence file, command line or the cycle file.
     if options.cycle_infile != "" && options.seq_infile != "" {
-        println!("Error: you have specified a sequence file '{}' as well as a cycle file '{}'. Specify only one.",
+        error!("Error: you have specified a sequence file '{}' as well as a cycle file '{}'. Specify only one.",
                  options.seq_infile, options.cycle_infile);
         std::process::exit(2)
     }
@@ -157,7 +158,7 @@ fn main() {
             // The `description` method of `io::Error` returns a string that
             // describes the error
             Err(why) => {
-                println!(
+                error!(
                     "Error: could not create the file '{}': {}.",
                     display,
                     Error::description(&why)
@@ -233,7 +234,7 @@ fn main() {
             match materials.iter().find(|m| options.dadn.starts_with(m.name)) {
                 Some(m) => m.eqn.variables(),
                 None => {
-                    println!("Error: Unknown dadn model {}", options.dadn);
+                    error!("Error: Unknown dadn model {}", options.dadn);
                     process::exit(1);
                 }
             }
@@ -282,7 +283,7 @@ fn main() {
             fracto::write_svg_pseudo_image(&history_all, &options.image, &options.image.file);
             println!("image written to file {}", &options.image.file);
         } else {
-            println!("Error: Currently easigo can only generate svg. Please use a '.svg' suffix");
+            error!("Error: Currently easigo can only generate svg. Please use a '.svg' suffix");
         }
     }
 }

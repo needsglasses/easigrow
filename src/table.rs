@@ -4,6 +4,8 @@
 use io;
 use std::{fmt, process, f64};
 
+use log::error;
+
 #[cfg(feature = "GSL")]
 pub use table_gsl::PairTable;
 
@@ -100,7 +102,7 @@ impl Table {
         // check that there the correct number of columns
         for acol in &self.values {
             if self.row.len() != acol.len() {
-                println!("Error: row {:?} != value {:?}", self.row, acol);
+                error!("Error: row {:?} != value {:?}", self.row, acol);
                 return false;
             }
         }

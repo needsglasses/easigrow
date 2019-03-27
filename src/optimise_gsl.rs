@@ -7,6 +7,7 @@
 use std::process;
 use options;
 use optimise;
+use log::{warn, error};
 
 extern crate rgsl;
 
@@ -38,7 +39,7 @@ pub fn gsl_match_crack(main_options: &options::EasiOptions, factors: &mut [f64])
     }
 
     if m < n {
-        println!(
+        error!(
             "Error: Insufficient number of match points {} to optimise {} variables",
             m, n
         );
@@ -89,13 +90,12 @@ pub fn gsl_match_crack(main_options: &options::EasiOptions, factors: &mut [f64])
     let mut status = rgsl::Value::Continue;
 
     loop {
-        println!("looping");
         if iter >= main_options.optimise.maxiter {
             // don't warn for single iteration passes
             if (main_options.verbosity == options::Verbosity::Verbose)
                 && main_options.optimise.maxiter > 0
             {
-                println!("Warning: we have exceeded the specified maximum iteration limit. Iter = {} > {} {:?}", 
+                warn!("Warning: we have exceeded the specified maximum iteration limit. Iter = {} > {} {:?}", 
                          iter, main_options.optimise.maxiter, status);
             }
             break;
@@ -103,9 +103,9 @@ pub fn gsl_match_crack(main_options: &options::EasiOptions, factors: &mut [f64])
 
         iter += 1;
 
-        println!("before s.x: {:?}", s.x());
+        debug!("before s.x: {:?}", s.x());
         status = s.iterate();
-        println!("after s.x: {:?}", s.x());
+        debug!("after s.x: {:?}", s.x());
 
         if status != rgsl::Value::Success {
             break;

@@ -2,11 +2,13 @@
 
 use std::io::{Read, Write};
 use std::fs::File;
-use std::error::Error;
 use tag::Tag;
 use cycle::Cycle;
 use std::path::Path;
 use std;
+use log::error;
+
+use std::error::Error;
 
 /// structure to hold measurements
 #[derive(Debug, Clone)]
@@ -64,7 +66,7 @@ pub fn read_fracto_file(crack_file: &str, nseq: usize) -> Vec<Measurement> {
                 a: m[2],
             },
             _ => {
-                println!("Error: unknown format for fracto file '{}'.", crack_file);
+                error!("Error: unknown format for fracto file '{}'.", crack_file);
                 std::process::exit(1)
             }
         };
@@ -83,7 +85,7 @@ pub fn read_table(filename: &str) -> Vec<Vec<f64>> {
         // The `description` method of `io::Error` returns a string that
         // describes the error
         Err(why) => {
-            println!(
+            error!(
                 "Error: could not open the file '{}': {}.",
                 display,
                 Error::description(&why)
@@ -96,7 +98,7 @@ pub fn read_table(filename: &str) -> Vec<Vec<f64>> {
     let mut s = String::new();
     match file.read_to_string(&mut s) {
         Err(why) => {
-            println!(
+            error!(
                 "Error: could not read {}: {}.",
                 display,
                 Error::description(&why)
@@ -147,7 +149,7 @@ pub fn write_sequence(filename: &str, seq: &[Tag]) {
 
     let mut file = match File::create(&path) {
         Err(why) => {
-            println!("Error: Could not create file '{}': {}.", filename, &why);
+            error!("Error: Could not create file '{}': {}.", filename, &why);
             std::process::exit(1)
         }
         Ok(file) => file,
@@ -157,7 +159,7 @@ pub fn write_sequence(filename: &str, seq: &[Tag]) {
         let result = writeln!(&mut file, "{}", load.value);
         match result {
             Ok(_result) => (),
-            Err(err) => println!(
+            Err(err) => error!(
                 "Error: unable to sucessfully write the sequence file - '{}'",
                 err
             ),
@@ -194,7 +196,7 @@ pub fn read_afgrow_cycles(cyclesfile: &str) -> Vec<Cycle<Tag>> {
 pub fn write_cycles(file: &str, cycles: &[Cycle<Tag>]) {
     let mut file = match File::create(&file) {
         Err(why) => {
-            println!("Error: Could not create file '{:?}': {}.", file, why);
+            error!("Error: Could not create file '{:?}': {}.", file, why);
             std::process::exit(1)
         }
         Ok(file) => file,
@@ -206,7 +208,7 @@ pub fn write_cycles(file: &str, cycles: &[Cycle<Tag>]) {
         let result = writeln!(&mut file, "{:?} {:?} 1\n", max.value, min.value);
         match result {
             Ok(_result) => (),
-            Err(err) => println!(
+            Err(err) => error!(
                 "Error: unable to sucessfully write the cycle file '{}'",
                 err
             ),

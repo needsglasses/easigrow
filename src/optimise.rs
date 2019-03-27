@@ -14,6 +14,7 @@ use fatigue::{beta, cycle, dadn, grow, plastic, tag};
 use self::rayon::prelude::*;
 use fatigue::io::Measurement;
 use std::collections::BTreeMap;
+use log::{warn, error};
 
 extern crate rayon;
 
@@ -37,7 +38,7 @@ pub fn nelder_match_crack(main_options: &options::EasiOptions, factors: &mut [f6
     }
 
     if m < n {
-        println!(
+        error!(
             "Error: Insufficient number of match points {} to optimise {} variables",
             m, n
         );
@@ -67,7 +68,7 @@ pub fn get_all_options(
         // The `description` method of `io::Error` returns a string that
         // describes the error
         Err(why) => {
-            println!(
+            error!(
                 "Error: could not open file '{}': {}.",
                 path.display(),
                 why.description()
@@ -94,7 +95,7 @@ pub fn get_all_options(
                 get_options_clap(&line, &mut options);
             }
             Err(e) => {
-                println!(
+                error!(
                     "Error: problem in reading line from the optimisation file: {}.",
                     e
                 );
@@ -111,7 +112,7 @@ pub fn get_all_options(
         options.sequence = cycle::process_seq_mods(&options.sequence, &options.seq_mods);
 
         if options.cycle_infile != "" && options.seq_infile != "" {
-            println!("Error: you have specified a sequence file '{}' as well as a cycle file '{}'. Specify only one.",
+            error!("Error: you have specified a sequence file '{}' as well as a cycle file '{}'. Specify only one.",
                      options.seq_infile, options.cycle_infile);
             process::exit(2)
         }
@@ -122,7 +123,7 @@ pub fn get_all_options(
         options.cycles = cycle::process_cycle_mods(&cycles, &options.cycle_mods);
 
         if options.crack_infile.is_empty() {
-            println!(
+            error!(
                 "Error: The --crack_infile option is missing from the list of
             parameters in the optimisation file. The crackfile option
             is necessary for optimisation because it supplies the target
@@ -322,7 +323,7 @@ fn compare_growth(
         }
 
         if history[0].crack.a[0] - history[0].da[0] > measured[i].a {
-            println!(
+            warn!(
                 "Warning: predicted starting crack size {} is greater than measured data {}",
                 history[0].crack.a[0] - history[0].da[0],
                 measured[i].a
@@ -335,7 +336,7 @@ fn compare_growth(
             (measured[i + 1].a - measured[i].a) / (measured[i + 1].block - measured[i].block);
 
         let error = if (history.is_empty()) || (history_dadb == 0.0) {
-            println!(
+            warn!(
                 "Warning: history block size is zero h_start {} a_start {} h_end {} a_end {}.",
                 h_start, history[h_start].crack.a[0], h_end, history[h_end].crack.a[0]
             );
@@ -375,7 +376,7 @@ fn compare_growth(
         }
 
         if h_end == h_start {
-            println!("Programming error: Things have gone wrong in compare_growth() with hstart {} == hend {}",
+            error!("Programming error: Things have gone wrong in compare_growth() with hstart {} == hend {}",
                      h_start, h_end);
         }
 
