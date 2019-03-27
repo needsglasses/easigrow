@@ -449,7 +449,7 @@ Cycle Summary
 "
     );
     println!("Source: {}", source);
-    println!("Cycle mods: {:?}", cycle_mods);
+    println!("Cycle mods: {:#?}", cycle_mods);
     println!("Number of closed cycles: {}", cycles.len());
     println!("Number of unclosed turning points: {}", unclosed.len());
 
@@ -507,7 +507,7 @@ Sequence Summary
     println!("Source: {}", source);
 
     // Write out all the modifications to the sequence.
-    println!("Sequence mods: {:?}", seq_mods);
+    println!("Sequence mods: {:#?}", seq_mods);
     println!("Length: {}", seq.len());
 
     if !seq.is_empty() {
