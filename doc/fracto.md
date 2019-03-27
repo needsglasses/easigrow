@@ -48,7 +48,7 @@ the individual segments.
 
 Here is an example that produces a fracto image.
 
-```bash
+```
 ./easigrow -s 5000e-6 -b compact-tada73 -o block,a,c,k -a 0.015
       -e .016 -q sequences/seq1.txt --forward=0.05
       --sideways=0.0125 -n 10 --image_outfile seq1.svg

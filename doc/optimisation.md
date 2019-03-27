@@ -10,7 +10,7 @@ Each line in the optimisation file is an easigrow command line that will
 generate a crack growth curve along with a measurement file of crack
 growth data that it tries to match.
 
-```bash
+```
 
 
 ```
@@ -94,7 +94,7 @@ of the parameters much closer to each other, which is better for most
 optimisation routines. The resultant normalised factors are [0.12376,
 0.66743, 3.7511].
 
-```bash
+```
 easigro --optimise optim --opt_max 1000 --opt_method Nelder -m walker:default
 
 ```

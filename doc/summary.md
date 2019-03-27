@@ -3,7 +3,7 @@ Here is an example of the `--summary` option used to obtain
 information about the sequence `seq2.txt` and the cycles it
 contains. 
 
-```bash
+```
 ./easigro -q examples/seq2.txt --summary 
 
 #  easiGro: version 0.0.0

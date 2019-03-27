@@ -11,7 +11,7 @@ width of the coupon of 12.5~mm. The initial starting distance of 15~mm
 is the length of the crack from the centre-line of the pin
 attachments. All distance units are given in m.
 
-```bash
+```
 ./easigrow -s 5000e-6 -b compact-tada73 -o block,a,k -a 0.015 -e 0.05  
           -q sequences/seq2.txt --forward=0.05 --sideways=0.0125 -n 10 
 
