@@ -80,7 +80,7 @@ pub fn get_options_clap(line: &str, options: &mut EasiOptions) {
              .short("a")
              .long("astart")
              .value_name("LENGTH")
-             .help("initial crack sizes (default 10e-6 m)")
+             .help("initial crack sizes (default 10e-6 m). How many depends on beta factor, typically a,c is used.")
              .takes_value(true)
              .require_delimiter(true)
              .allow_hyphen_values(true))
