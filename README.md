@@ -85,7 +85,7 @@ See the [AUTHORS](AUTHORS) file for a list of contributors to the code.
 ## License
 
 This software is licensed under the MIT license, see the
-[LICENSE](LICENSE) file for legal text.
+[LICENSE-MIT](LICENSE-MIT) file for legal text.
 
 Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in the work by you, shall be licensed under the same MIT license,
