@@ -9,7 +9,7 @@
 /// optimum parameters of a crack growth model to match predictions
 /// with measurements.
 ///
-/// **easiGro** is a standalone program but most of the calculations
+/// **easiGrow** is a standalone program but most of the calculations
 /// are done through calls to the associated **fatigue** library which
 /// is included. The main program is for doing anything that
 /// explicitly uses the command line flags inlcuding the optimisation
@@ -85,7 +85,7 @@ fn main() {
 
     let mut options = options::get_default_options();
     get_options_clap("", &mut options);
-    println!("{}easiGro: version {}", COMMENT, crate_version!());
+    println!("{}easiGrow: version {}", COMMENT, crate_version!());
     println!("{}", COMMENT);
     if options.verbosity == options::Verbosity::Verbose {
         println!("{}Options: ", COMMENT);
@@ -327,10 +327,10 @@ fn generate_crack_history(options: &options::EasiOptions, params: &[f64]) -> Vec
     let beta = beta::get_beta_fn(&options.beta, &options.component);
 
     if options.scale == 0.0 {
-        println!(
+        error!(
             "Error: The sequence scale factor is 0. You need to set the scale factor
            (i.e. load or stress level) in order to perform a crack growth calculation.
-           Try\n easigro --help"
+           Try\n easigrow --help"
         );
         std::process::exit(1);
     }
