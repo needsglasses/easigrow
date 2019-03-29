@@ -32,7 +32,7 @@ Paul White
 Example
 ========
 
-easigrow -q ft55.seq -s 300 -r -b seft-newman84 --cycle_method rainflow -m walker:default -a 10e-6 -e 5e-3 -o block,a -n
+easigrow -q ft55.seq -s 300 -r -b seft-newman84 --cycle_method rainflow -d walker:default -a 10e-6 -e 5e-3 -o block,a -n
 10 
 
 

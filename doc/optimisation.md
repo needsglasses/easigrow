@@ -95,7 +95,7 @@ optimisation routines. The resultant normalised factors are [0.12376,
 0.66743, 3.7511].
 
 ```
-easigro --optimise optim --opt_max 1000 --opt_method Nelder -m walker:default
+easigro --optimise optim --opt_max 1000 --opt_method Nelder -d walker:default
 
 ```
 

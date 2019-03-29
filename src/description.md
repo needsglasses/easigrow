@@ -27,7 +27,7 @@ Example
 ========
 
 ```
-easigro -q ft55.seq -s 300 -r -b seft-newman84 --cycle_method rainflow -m walker:default -a 10e-6 -e 5e-3 -o block,a -n 10 
+easigro -q ft55.seq -s 300 -r -b seft-newman84 --cycle_method rainflow -d walker:default -a 10e-6 -e 5e-3 -o block,a -n 10 
 ```
 
 This means:
@@ -38,7 +38,7 @@ to close all cycles. Use the beta model for a 'semi-elliptical surface
 crack in a finite plate in tension' by Newman and Raju [-b
 seft-newman84] and calculate the crack size by summing up the growth
 increment for each rainflow cycle [--cycle_method rainflow] using the
-Walker da/dN equation with default material parameters [-m
+Walker da/dN equation with default material parameters [-d
 walker:default].  Starting at an initial crack size 10 um [-a 10e-6]
 grow the crack until a final size 5 mm [-e 5e-3], writing out the
 variables 'block' and 'a' [-o block,a] every 10 blocks [-n 10].
