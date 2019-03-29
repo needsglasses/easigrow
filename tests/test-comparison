@@ -1,0 +1,37 @@
+# Here are some comparisons of easigrow predictions with rainflow test data
+coupon sequence easigrow test
+# short crack dogbone coupon 
+# easigrow --dadn white:barter14-aa7050t7451 -q data/rainflow-seq2.txt -s 300 --beta qcct-mcdonald07
+0 2  228.0915 135.5
+# easigrow --dadn white:barter14-aa7050t7451 -q data/rainflow-seq3.txt -s 240 --beta qcct-mcdonald07
+0 3  482.9070 173.3
+# easigrow --dadn white:barter14-aa7050t7451 -q data/rainflow-seq4.txt -s 300 --beta qcct-mcdonald07
+0 4  123.0112  95.6
+# easigrow --dadn white:barter14-aa7050t7451 -q data/rainflow-seq5.txt -s 300 --beta qcct-mcdonald07
+0 5  339.7211 237.1
+# Long crack middle crack tension coupon
+# easigrow --dadn white:barter14-aa7050t7451 -q data/rainflow-seq2.txt -s 75 --beta ct-koiter65 --astart 6e-3 -e 0.1 -n 10 --output_vars block,a,a/d --forward 48e-3
+1 2 83.0315  101.4
+# easigrow --dadn white:barter14-aa7050t7451 -q data/rainflow-seq3.txt -s 60 --beta ct-koiter65 --astart 6e-3 -e 0.1 -n 10 --output_vars block,a,a/d --forward 48e-3
+1 3 170.6177 277.6
+# easigrow --dadn white:barter14-aa7050t7451 -q data/rainflow-seq4.txt -s 75 --beta ct-koiter65 --astart 6e-3 -e 0.1 -n 10 --output_vars block,a,a/d --forward 48e-3
+1 4 42.3279    85.0
+# easigrow --dadn white:barter14-aa7050t7451 -q data/rainflow-seq5.txt -s 75 --beta ct-koiter65 --astart 6e-3 -e 0.1 -n 10 --output_vars block,a,a/d --forward 48e-3
+1 5 116.0758  255.4
+#
+# Here are some more comparisons with crack closure tests
+# see @Article{white18,
+#   author = 	 {P. D. White and S. A. Barter and N. Medhekar},
+#   title = 	 {Comparison of fractographic and strain gauge measurement of load ratio effects under variable amplitude loading},
+#   journal = 	 {International Journal of Fatigue},
+#   volume = 112,
+#   pages = {240--252},
+#   month = {July},
+#   year = 	 2018}
+# easigrow --dadn white:barter14-aa7050t7451 -q data/closure-seq1.txt -s 5000e-6 --beta compact-tada73 --astart 11.45e-3 -e 0.1 -n 10 --output_vars block,a,a/d --forward 48e-3 --sideways 12e-3
+2 7 185.1172 330.5
+2 7 185.1172 347.11
+2 7 185.1172 312.65
+# easigrow --dadn white:barter14-aa7050t7451 -q data/closure-seq1.txt -s 4000e-6 --beta compact-tada73 --astart 11.45e-3 -e 0.1 -n 10 --output_vars block,a,a/d --forward 48e-3 --sideways 12e-3
+2 8 223.3494 388.66
+2 8 223.3494 342.68
