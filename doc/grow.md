@@ -3,11 +3,11 @@
 Here is an example of a simple crack growth calculation for a
 compact tension coupon. The compact tension geometry factor uses the
 applied load on the coupon rather than the far-field stress, so for
-this example the scaling factor is 5000~N and because consistent units
-are MN this becomes 5000E-6 MN. The forward distance of 50~mm
+this example the scaling factor is 5000 N and because consistent units
+are MN this becomes 5000E-6 MN. The forward distance of 50 mm
 represents the distance from the centre-line of the pin attachment
 holes to the free edge but the sideways distance is actually the full
-width of the coupon of 12.5~mm. The initial starting distance of 15~mm
+width of the coupon of 12.5 mm. The initial starting distance of 15 mm
 is the length of the crack from the centre-line of the pin
 attachments. All distance units are given in m.
 
