@@ -421,7 +421,6 @@ Warning: There are no sequence lines in the cycle list and so there
         if grow::output_cycle_history(&history, options.output_every, &output_lines, cycle_no) {
             grow::display_history_line(&history, &options.output_vars, &options.component);
         }
-
         // Only keep the history if we are producing a fracto image.
         if options.image.file != "" {
             history_all.push(history);

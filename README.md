@@ -26,8 +26,8 @@ pre-existing building blocks.
 
 Here is a simple example of growing a crack from the command line:
 
-```bash
-./target/release/easigrow -q seq2.txt -s 300 -n 100
+```
+easigrow -q data/rainflow-seq2.txt -s 300 -n 100
 
 #  easigrow: version 0.0.0
 #  
@@ -76,7 +76,7 @@ easigrow = {git = "https://github.com/needsglasses/easigrow"}
 
 ## Contributing
 
-If you want to contribute to Easigrow, there are several ways to go:
+Contributions to Easigrow are welcome. There are several ways to help:
 improving the documentation; testing the code on your systems to find
 bugs; adding new algorithms or data; providing feature requests.
 
