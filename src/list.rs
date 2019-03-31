@@ -24,16 +24,16 @@ static HIGHLIGHTS: &'static str = "
    blocks. 
 ";
 
-static UNITS: &'static str = "The internal da/dN data are all in units
-for stress intensity of (MPa m^0.5) and growth in (m). Most beta
-equations use an applied far field stress which is in units of
-(MPa). Thus the scaling factor in units of (MPa) will generally
-convert the sequence into the correct units. However, the
-compact-tension beta factor compact_tada73 uses applied load not
-stress and is in units of load of (MN) and coupon dimensions are in
-(m). The width and depth will need to be set for the compact-tension
-beta function otherwise **easiGrow** will assume an infinite plate and
-the crack will not grow.";
+static UNITS: &'static str = "The internal da/dN data are all in units for stress intensity of (MPa
+m^0.5) and growth in (m). Most beta equations use an applied far field
+stress which is in units of (MPa). Thus the scaling factor in units of
+(MPa) will generally convert the sequence into the correct
+units. However, the compact-tension beta factor compact_tada73 uses
+applied load not stress and is in units of load of (MN) and coupon
+dimensions are in (m). The width and depth will need to be set for the
+compact-tension beta function otherwise **easiGrow** will assume an
+infinite plate and the crack will not grow.  
+";
 
 /// Prints out lists of data. Sort of an extended help.
 pub fn print_list() {
