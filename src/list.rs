@@ -30,7 +30,7 @@ static UNITS: &'static str = "  The internal da/dN data are all in units for str
   compact-tension beta factor compact_tada73 uses applied load not stress and
   is in units of load of (MN) and coupon dimensions are in (m). The
   width and depth will need to be set for the compact-tension beta
-  function otherwise **easiGro** will assume an infinite plate and the
+  function otherwise **easiGrow** will assume an infinite plate and the
   crack will not grow.
 ";
 
@@ -98,8 +98,8 @@ one block apart with each block measured at line 0. Use the same
 format for the entire file. Where <line> represents the corresponding
 line no. (starting at 0) of the sequence file, and <block> is the
 no. of the block at that crack depth. Strictly speaking, the actual
-block numbers are not used by easigro with only the difference between
-the block numbers in contiguous measurements used. Easigro only
+block numbers are not used by easigrow with only the difference between
+the block numbers in contiguous measurements used. Easigrow only
 matches the average crack growth rate using:
 
    rate = (growth between measurements) / (no. of blocks between measurements).
@@ -107,8 +107,8 @@ matches the average crack growth rate using:
         ),
         (
             "Optimise file",
-            "Each line in the optimise file is a list of easigro command lines
-(without the 'easigro' command) with each line containing the easigro
+            "Each line in the optimise file is a list of easigrow command lines
+(without the 'easigrow' command) with each line containing the easigrow
 options that will best reproduce the crack growth calculation for the
 associated crack growth curve that it is trying to match. Note: Only
 the material model specified by the main command line that invokes the
@@ -118,8 +118,8 @@ specifications will be ignored.
 
 The format of the optimisation file is:
 
-<easigro option> ... --crack <FILE1>
-<easigro option> ... --crack <FILE2>
+<easigrow option> ... --crack <FILE1>
+<easigrow option> ... --crack <FILE2>
 ...
 ",
         ),
@@ -270,7 +270,7 @@ tension   Crack growth calculated from tension part of cycle i.e. from a valley 
         "     The da/dN model consists of EQUATION:material where the
     equation variable specifies the name of the da/dN equation and is
     one of  [nasgro, paris, forman, walker, burchill, hartman, white, file]
-    The material varable specifies the name of the parameters to use for
+    The material variable specifies the name of the parameters to use for
     that equation. If the values are given in --parameters they will
     be used instead of the standard library values.
 "

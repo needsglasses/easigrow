@@ -6,7 +6,7 @@ use log::error;
 
 /// Get the options from the command line.
 pub fn get_options_clap(line: &str, options: &mut EasiOptions) {
-    let process = App::new("easiGro: A crack growth modelling program")
+    let process = App::new("easiGrow: A crack growth modelling program")
         .author("Paul White")
         .version(crate_version!())
         .about(include_str!("description.md"))
