@@ -348,7 +348,7 @@ pub fn get_options_clap(line: &str, options: &mut EasiOptions) {
     } else {
         // get them from the string
         // add command word since it skips first argument
-        process.get_matches_from(("easigro ".to_string() + line.trim()).split(' '))
+        process.get_matches_from(("easigrow ".to_string() + line.trim()).split(' '))
     };
 
     // basic crack growth options
