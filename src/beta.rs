@@ -76,8 +76,9 @@ impl fmt::Display for TableBeta {
     }
 }
 
-/// This is a generic beta value
-/// Some of these betas do not use the phi vector and so the consistentancy is wrong.
+/// Given the name of a beta function, this extracts a particular beta
+/// from a list of all available betas.  If the beta it is not found
+/// it will trigger an error! call.
 pub fn get_beta_fn(beta_name: &str, component: &grow::Component) -> Box<Beta> {
     let all_betas = get_all_betas(component);
 
@@ -104,7 +105,9 @@ pub struct BetaCite<'a> {
     pub eqn: Box<Beta>,
 }
 
-// all semi-elliptical and quarter  cracks are surface cracks
+/// Return a Vec of all the beta functions that are available.
+/// Note: all semi-elliptical and quarter cracks are surface cracks.
+/// The component geometry is required only for the compact tension beta.
 pub fn get_all_betas(component: &grow::Component) -> Vec<BetaCite<'static>> {
     vec![
         BetaCite {

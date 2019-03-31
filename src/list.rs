@@ -1,38 +1,39 @@
 use fatigue::{beta, grow, material};
 
 static HIGHLIGHTS: &'static str = "
-       * **Sequence filtering** Performs sequence reordering,
-          turning-point, dead-band, rise-fall filtering and rain-flow
-          counting.  The filtered sequences may be written to a file.
+* **Sequence filtering** Performs sequence reordering,
+   turning-point, dead-band, rise-fall filtering and rain-flow
+   counting.  The filtered sequences may be written to a file.
 
-       * **Inbuilt data** Comes with a selection of beta factors,
-          material data and crack growth models.
+* **Inbuilt data** Comes with a selection of beta factors,
+   material data and crack growth models.
 
-       * **Calculated parameters** Calculates additional parameters for
-          characterising the state of the crack tip so that better
-          crack growth equations can be developed based on the most
-          applicable parameters for a material.
+* **Calculated parameters** Calculates additional parameters for
+   characterising the state of the crack tip so that better
+   crack growth equations can be developed based on the most
+   applicable parameters for a material.
 
-       * **Optimisation** Optimises the crack growth model parameters to
-          minimise the difference between predicted and measured crack
-          growth. The measured data need not be for the entire history
-          i.e., one or more fractographic measurements of the width of
-          a block.
+* **Optimisation** Optimises the crack growth model parameters to
+   minimise the difference between predicted and measured crack
+   growth. The measured data need not be for the entire history
+   i.e., one or more fractographic measurements of the width of
+   a block.
 
-       * **Image generation** Generates a pseudo fractographic image of the fracture
-          surface to see how easy it is to identify the individual
-          blocks. 
+* **Image generation** Generates a pseudo fractographic image of the fracture
+   surface to see how easy it is to identify the individual
+   blocks. 
 ";
 
-static UNITS: &'static str = "  The internal da/dN data are all in units for stress intensity of
-  (MPa m^0.5) and growth in (m). Most beta equations use an applied
-  far field stress which is in units of (MPa). However, the
-  compact-tension beta factor compact_tada73 uses applied load not stress and
-  is in units of load of (MN) and coupon dimensions are in (m). The
-  width and depth will need to be set for the compact-tension beta
-  function otherwise **easiGrow** will assume an infinite plate and the
-  crack will not grow.
-";
+static UNITS: &'static str = "The internal da/dN data are all in units
+for stress intensity of (MPa m^0.5) and growth in (m). Most beta
+equations use an applied far field stress which is in units of
+(MPa). Thus the scaling factor in units of (MPa) will generally
+convert the sequence into the correct units. However, the
+compact-tension beta factor compact_tada73 uses applied load not
+stress and is in units of load of (MN) and coupon dimensions are in
+(m). The width and depth will need to be set for the compact-tension
+beta function otherwise **easiGrow** will assume an infinite plate and
+the crack will not grow.";
 
 /// Prints out lists of data. Sort of an extended help.
 pub fn print_list() {
@@ -102,7 +103,7 @@ block numbers are not used by easigrow with only the difference between
 the block numbers in contiguous measurements used. Easigrow only
 matches the average crack growth rate using:
 
-   rate = (growth between measurements) / (no. of blocks between measurements).
+   rate = log(growth between measurements) / log(no. of blocks between measurements).
 ",
         ),
         (
@@ -254,25 +255,32 @@ dadn2 deltaK2_r1 deltaK2_r2 ....
         );
     }
 
-    header.section("Crack growth Models");
+    header.section("Cycle Counting  Models");
+
+    println!("Crack growth is calculated for each cycle. The cyles can
+be input directly or extracted from a sequence. The way the cycles are
+determined affects the growth. The methods for extracting cycles from
+a sequence are:");
+
     println!(
-        "rainflow  Crack growth is calculated from rainflow cycles i.e., the
+        "
+rainflow  Crack growth is calculated from rainflow cycles i.e. the
           stress intensity range comes from the range of the rainflow
           cycles. Note this has a slight re-ordering effect that may upset
           the order of any image plots created.
 
-tension   Crack growth calculated from tension part of cycle i.e. from a valley to the next peak.
-"
-    );
+tension   Crack growth calculated from tension part of cycle i.e. from a valley
+          to the next peak. The striation pattern follows these tension cycles.
+");
 
     header.section("da/dN data");
     println!(
-        "     The da/dN model consists of EQUATION:material where the
-    equation variable specifies the name of the da/dN equation and is
-    one of  [nasgro, paris, forman, walker, burchill, hartman, white, file]
-    The material variable specifies the name of the parameters to use for
-    that equation. If the values are given in --parameters they will
-    be used instead of the standard library values.
+        "The da/dN model consists of EQUATION:material where the
+equation variable specifies the name of the da/dN equation and is
+one of  [nasgro, paris, forman, walker, burchill, hartman, white, file]
+The material variable specifies the name of the parameters to use for
+that equation. If the values are given in --parameters they will
+be used instead of the standard library values.\n
 "
     );
 
