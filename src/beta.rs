@@ -988,11 +988,11 @@ impl Beta for EdgeCrackStripTensionMurakami87 {
 /// Ref. Beta Values for Low Kt Specimens by M. `McDonald`
 /// DSTO Minute Air07/048 Combat Aircraft Support.
 struct CornerCrackConstrainedTensionMcdonald07 {
-    table: table::Table,
+    deep: table::Table,
 }
 
 impl CornerCrackConstrainedTensionMcdonald07 {
-    fn new() -> TableBeta {
+    fn new() -> Self {
         let a = vec![
             0.0, 0.0001, 0.0006, 0.0011, 0.0016, 0.0021001, 0.0026003, 0.0031004, 0.0036005,
             0.0041007, 0.0046014, 0.005102, 0.0056027, 0.0061034, 0.0066051, 0.0071055, 0.0076062,
@@ -1027,9 +1027,7 @@ impl CornerCrackConstrainedTensionMcdonald07 {
         // non-dimensionalise the crack depth data by the coupon width 25 mm
         let a_on_ds = a.iter().map(|x| x / 25.0e-3).collect::<Vec<f64>>();
         
-        TableBeta {
-            table: table::Table::new(vec![0.0], a_on_ds, vec![betas], false),
-        }
+        Self { deep: table::Table::new(vec![0.0], a_on_ds, vec![betas], false) }
     }
 }
 
@@ -1043,7 +1041,7 @@ impl Beta for CornerCrackConstrainedTensionMcdonald07 {
         _a_on_r: f64,
         _phis: &[f64],
     ) -> Vec<f64> {
-        vec![self.table.interp(a_on_d, 0.0)]
+        vec![self.deep.interp(a_on_d, 0.0)]
     }
 
     fn area(&self, a_on_d: f64, _a_on_c: f64, _c_on_b: f64, _a_on_r: f64) -> f64 {
@@ -1105,7 +1103,7 @@ struct SemiEllipticalSurfaceCrackRoundBarBendingShin04 {
 }
 
 impl SemiEllipticalSurfaceCrackRoundBarBendingShin04 {
-    fn new() -> SemiEllipticalSurfaceCrackRoundBarBendingShin04 {
+    fn new() -> Self {
         let a_on_ds = vec![
             0.067, 0.133, 0.200, 0.267, 0.333, 0.400, 0.467, 0.533, 0.600, 0.667, 0.733, 0.800
         ];
