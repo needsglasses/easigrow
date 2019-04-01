@@ -55,6 +55,7 @@ impl Table {
         let mut rows = vec![];
         for _i in 0..columns.len() {
             rows.push(row.clone());
+            rows.push(row.clone());
         }
 
         // transpose the table so the elements are the columns

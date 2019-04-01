@@ -419,14 +419,14 @@ pub fn reorder_sequence<T: PartialOrd + Clone>(seq: &[T]) -> Vec<T> {
             start = i;
         }
     }
-    let mut rseq = Vec::new();
 
-    for i in start..seq.len() {
-        rseq.push(seq[i].clone());
+    let mut rseq = Vec::new();
+    for tp in seq.iter().skip(start) {
+        rseq.push(tp.clone());
     }
 
-    for i in 0..=start {
-        rseq.push(seq[i].clone());
+    for tp in seq.iter().take(start + 1) {
+        rseq.push(tp.clone());
     }
 
     rseq
