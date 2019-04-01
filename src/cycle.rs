@@ -576,9 +576,9 @@ pub fn cycles_from_sequence(
 ) -> (Vec<Cycle<tag::Tag>>, Vec<tag::Tag>) {
     let tp_reseq = turning_points(sequence);
 
-    match cycle_method {
-        &CycleMethod::Rainflow => rainflow(&tp_reseq),
-        &CycleMethod::Tension => tension(&tp_reseq),
+    match *cycle_method {
+        CycleMethod::Rainflow => rainflow(&tp_reseq),
+        CycleMethod::Tension => tension(&tp_reseq),
     }
 }
 

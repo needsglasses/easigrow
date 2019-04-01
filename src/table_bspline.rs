@@ -88,7 +88,7 @@ impl PairTable {
                debug!("interp for {} using col {}", row, col_low);
                debug!("knot domain {:?}", self.splines[col_low].knot_domain());
 
-        let row_s = self.splines[col_low].point(row_limited as f32) as f64;
+        let row_s = f64::from(self.splines[col_low].point(row_limited as f32));
         debug!("done interp row_s {}", row_s);      
         debug!("No. of columns {}", self.columns.len());
 
@@ -97,7 +97,7 @@ impl PairTable {
             debug!("End interpolation");
             let row_limited = row.max(self.rows[col_low + 1][0])
                 .min(self.rows[col_low + 1][(self.rows[col_low + 1].len() - 1)]);
-            let row_e = self.splines[col_low + 1].point(row_limited as f32) as f64;
+            let row_e = f64::from(self.splines[col_low + 1].point(row_limited as f32));
             debug!("done interp row_e {:?}", row_e);
             let interp = ((column - self.columns[col_low])
                 / (self.columns[col_low + 1] - self.columns[col_low]))

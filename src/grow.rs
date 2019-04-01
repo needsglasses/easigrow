@@ -214,10 +214,10 @@ impl History {
 
         History {
             block: self.block, // part_block,
-            da: da_all.clone(),
-            k: k_all.clone(),
-            dk: dk_all.clone(),
-            cycle: cycle.clone(),
+            da: da_all,
+            k: k_all,
+            dk: dk_all,
+            cycle: *cycle,
             stress: scale,
             beta: betas,
             crack: CrackState {

@@ -1041,6 +1041,7 @@ impl Beta for CornerCrackConstrainedTensionMcdonald07 {
         _a_on_r: f64,
         _phis: &[f64],
     ) -> Vec<f64> {
+        
         vec![self.deep.interp(a_on_d, 0.0)]
     }
 
