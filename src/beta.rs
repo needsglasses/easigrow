@@ -13,7 +13,7 @@
 //! No need to say surface for semi-elliptical or quarter cracks.
 
 // cargo test -- --nocapture
-
+#![allow(clippy::unreadable_literal)]
 use table;
 use std::process;
 use std::f64::consts::{FRAC_PI_2, PI};
@@ -998,7 +998,7 @@ impl CornerCrackConstrainedTensionMcdonald07 {
             0.0041007, 0.0046014, 0.005102, 0.0056027, 0.0061034, 0.0066051, 0.0071055, 0.0076062,
             0.0081089, 0.0086145, 0.0091147, 0.00962, 0.0101257,
         ];
-
+        
         let betas = vec![
             0.709411963f64,
             0.709411963,
@@ -1023,15 +1023,16 @@ impl CornerCrackConstrainedTensionMcdonald07 {
             1.434011108,
             1.46362585,
         ];
-
+        
         // non-dimensionalise the crack depth data by the coupon width 25 mm
         let a_on_ds = a.iter().map(|x| x / 25.0e-3).collect::<Vec<f64>>();
-
+        
         TableBeta {
             table: table::Table::new(vec![0.0], a_on_ds, vec![betas], false),
         }
     }
 }
+
 
 impl Beta for CornerCrackConstrainedTensionMcdonald07 {
     fn beta(

@@ -37,7 +37,7 @@ impl PairTable {
             let mut t = rows[i].iter().map(|&e| e as f32).collect() ;
             knots.append(&mut t);
             let end = knots[knots.len() - 1];
-            knots.push(end.clone());
+            knots.push(end);
 
             let mut points = Vec::new();
             let mut v = values[i].iter().map(|&e| e as f32).collect();

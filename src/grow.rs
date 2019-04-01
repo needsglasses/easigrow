@@ -335,7 +335,7 @@ pub fn reached_limit(
         );
         terminate = true;
     }
-
+    
     if !a_limit.is_empty() && a.iter().zip(a_limit).any(|(a, e)| a >= e) {
         message += &format!(
             "{}Failure Event: a{:?} >= a_limit{:?}\n",
