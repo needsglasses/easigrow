@@ -1,4 +1,5 @@
 //! Grow a fatigue crack from initial crack size until failure.
+#![allow(clippy::useless_let_if_seq)]
 
 use std::f64::consts::FRAC_PI_2;
 use COMMENT;

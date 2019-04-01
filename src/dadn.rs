@@ -729,7 +729,7 @@ impl DaDn for table::Table {
             .flat_map(|v| v.clone())
             .collect::<Vec<f64>>()
     }
-
+    
     fn dadn(&self, kmin: f64, kmax: f64, _state: CrackState) -> f64 {
         info!("kmin {} kmax {}", kmin, kmax);
         let rmax = self.columns[self.columns.len() - 1];
