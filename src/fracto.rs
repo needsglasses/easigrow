@@ -15,7 +15,7 @@
 use grow::History;
 use std::str::FromStr;
 use numbers::NonNan;
-    
+
 // create the image using SVG
 use svg::Document;
 use svg::node::element;
@@ -46,8 +46,8 @@ impl FromStr for ImageType {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "Sem" => Ok(ImageType::Sem),
-            "Optical" => Ok(ImageType::Optical),
+            "Sem" | "sem" => Ok(ImageType::Sem),
+            "Optical" | "optical" => Ok(ImageType::Optical),
             _ => Err("no match"),
         }
     }
@@ -224,16 +224,62 @@ pub fn write_svg_pseudo_image(history: &[History], frame: &ImageData, filename: 
 //     }
 // }
 
-// #[test]
-// fn test_make_pseudo_image() {
-//     let mut history = Vec::new();
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use cycle::Cycle;
+    use plastic::ZoneWidth;
+    use grow::CrackState;
+    use tag::Tag;
+    use std::path::Path;
+    use std::fs;
+    
+    #[test]
+    fn test_make_pseudo_image() {
+        let mut history = Vec::new();
+        
+        let da = 1e-7;
+        let mut a = 1e-6;
+        let mut block;
+        
+        let hist = |a, block, peak| History {
+            block: block,
+            stress: 300.0,
+            cycle: Cycle::new(Tag::new(peak, 0), Tag::new(0.0, 0)),
+            k: vec![1.0],
+            dk: vec![1.0],
+            beta: vec![1.0],
+            da: vec![da],
+            crack: CrackState {
+                a: vec![a],
+                mono_zone_extent: ZoneWidth{plane_stress: 0.1, plane_strain: 0.1},
+                cyclic_zone_extent: ZoneWidth{plane_stress: 0.1, plane_strain: 0.1},
+            },
+        };
 
-//     for i in 0..10000 {
-//         history.push((i as f64 / 100000.0,
-//                       i as f64 / 100000.0,
-//                       i as f64 / 100000.0,
-//                       i as f64 / 10000.0));
-//     }
-//     let image = ImageData {file: "test.png".to_string(), barlength: 5e-6, xsize:300, ysize: 800};
-//     make_pseudo_image(history, image, 5e-6);
-// }
+        for b in 5..10 {
+            for i in 0..100 {
+                a += da;
+                block = b as f64 + i as f64 / 200.0;
+                history.push(hist(a, block, 1.0));
+            }
+            for i in 0..100 {
+                a += da;
+                block = b as f64 + 0.5 + i as f64 / 200.0;
+                history.push(hist(a, block, 0.5));
+            }
+        }
+        
+        let image = ImageData { file: "test.png".to_string(),
+                                barlength: 5e-6,
+                                xsize:300,
+                                ysize: 800,
+                                image: ImageType::Sem,
+    };
+
+        let filename = "fracto-test.svg";
+        write_svg_pseudo_image(&history, &image, filename) ;
+        assert_eq!(Path::new(filename).exists(), true);
+        let _r = fs::remove_file(filename);
+    }
+}
