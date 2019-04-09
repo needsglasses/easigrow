@@ -277,7 +277,7 @@ mod tests {
                                 image: ImageType::Sem,
     };
 
-        let filename = "fracto-test.svg";
+        let filename = "/tmp/fracto-test.svg";
         write_svg_pseudo_image(&history, &image, filename) ;
         assert_eq!(Path::new(filename).exists(), true);
         let _r = fs::remove_file(filename);
