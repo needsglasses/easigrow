@@ -25,7 +25,7 @@ use svg;
 #[derive(Debug, Clone)]
 pub struct ImageData {
     /// Name of pseudo image file.
-    pub filename: String,
+    pub file: String,
     /// Size of scale bar for image.
     pub barlength: f64,
     pub xsize: u32,
@@ -207,7 +207,7 @@ pub fn write_svg_pseudo_image(history: &[History], frame: &ImageData) {
 
     // document = document.add(path);
 
-    svg::save(&frame.filename, &document).unwrap();
+    svg::save(&frame.file, &document).unwrap();
 }
 
 // put a micron bar on the image
@@ -270,7 +270,7 @@ mod tests {
             }
         }
         
-        let image = ImageData { filename: "/tmp/fracto-test.svg".to_string(),
+        let image = ImageData { file: "/tmp/fracto-test.svg".to_string(),
                                 barlength: 5e-6,
                                 xsize:300,
                                 ysize: 800,
@@ -278,7 +278,7 @@ mod tests {
     };
 
         write_svg_pseudo_image(&history, &image) ;
-        assert_eq!(Path::new(&image.filename).exists(), true);
-        let _r = fs::remove_file(image.filename);
+        assert_eq!(Path::new(&image.file).exists(), true);
+        let _r = fs::remove_file(image.file);
     }
 }

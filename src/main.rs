@@ -273,11 +273,11 @@ fn main() {
 
     // Lastly, now that we've grown the crack, check if we need to
     // generate and write out a pseudo image.
-    if options.image.filename != "" {
+    if options.image.file != "" {
         println!("Making a pseudo image...");
-        if options.image.filename.ends_with(".svg") {
+        if options.image.file.ends_with(".svg") {
             fracto::write_svg_pseudo_image(&history_all, &options.image);
-            println!("Image written to file '{}'", options.image.filename);
+            println!("Image written to file '{}'", options.image.file);
         } else {
             error!("Error: Currently easigo can only generate svg. Please use a '.svg' suffix");
         }
@@ -421,7 +421,7 @@ Warning: There are no sequence lines in the cycle list and so there
             grow::display_history_line(&history, &options.output_vars, &options.component);
         }
         // Only keep the history if we are producing a fracto image.
-        if options.image.filename != "" {
+        if options.image.file != "" {
             history_all.push(history);
         }
     }

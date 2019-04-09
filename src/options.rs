@@ -141,7 +141,7 @@ impl std::fmt::Display for EasiOptions {
             let _e = writeln!(f, "{}crack_weight: {:?}", COMMENT, self.crack_weight);
         }
 
-        if self.image.filename != "" {
+        if self.image.file != "" {
             let _e = writeln!(f, "{}fracto: {:?}", COMMENT, self.fracto);
             let _e = writeln!(f, "{}image: {:?}", COMMENT, self.image);
         }
@@ -234,7 +234,7 @@ pub fn get_default_options() -> EasiOptions {
         },
 
         image: fracto::ImageData {
-            filename: "".to_string(),
+            file: "".to_string(),
             barlength: 50e-6,
             xsize: 300,
             ysize: 8000,
