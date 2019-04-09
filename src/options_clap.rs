@@ -486,7 +486,7 @@ pub fn get_options_clap(line: &str, options: &mut EasiOptions) {
 
     // Image generation options.
     if let Some(file) = matches.value_of("image_outfile") {
-        options.image.file = file.to_string();
+        options.image.filename = file.to_string();
     }
     if let Ok(image_bar) = value_t!(matches, "image_bar", f64) {
         options.image.barlength = image_bar;

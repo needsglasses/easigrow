@@ -1,4 +1,4 @@
-/// easiGro
+/// easiGrow
 ///
 /// by Paul White (Nov 2014--2017)
 /// written in rust (www.rust-lang.org)
@@ -40,8 +40,12 @@
 /// 5. Perform a crack growth calculation
 /// 6. Write out requested output
 
-// #![cfg_attr(feature="clippy", feature(plugin))]
-// #![cfg_attr(feature="clippy", plugin(clippy))]
+#[macro_use]
+extern crate clap;
+extern crate fatigue;
+extern crate log;
+extern crate env_logger;
+
 use std::f64::consts::FRAC_PI_2;
 use std::process;
 use std::collections::BTreeSet;
@@ -56,14 +60,6 @@ use std::path::Path;
 use log::error;
 use std::io::Write;
 
-extern crate log;
-extern crate env_logger;
-
-#[macro_use]
-extern crate clap;
-extern crate fatigue;
-
-//mod options_argparse;
 mod list;
 mod optimise;
 mod sweep;
@@ -277,11 +273,11 @@ fn main() {
 
     // Lastly, now that we've grown the crack, check if we need to
     // generate and write out a pseudo image.
-    if options.image.file != "" {
+    if options.image.filename != "" {
         println!("Making a pseudo image...");
-        if options.image.file.ends_with(".svg") {
-            fracto::write_svg_pseudo_image(&history_all, &options.image, &options.image.file);
-            println!("image written to file {}", &options.image.file);
+        if options.image.filename.ends_with(".svg") {
+            fracto::write_svg_pseudo_image(&history_all, &options.image);
+            println!("Image written to file '{}'", options.image.filename);
         } else {
             error!("Error: Currently easigo can only generate svg. Please use a '.svg' suffix");
         }
@@ -296,7 +292,7 @@ fn optimise_error(options: &options::EasiOptions, mut factors: &mut [f64]) {
         OptimMethod::All => {
             sweep::sweep(options, &mut factors);
             optimise::nelder_match_crack(options, &mut factors)
-        }
+        }        
     };
 }
 
@@ -354,6 +350,9 @@ fn generate_crack_history(options: &options::EasiOptions, params: &[f64]) -> Vec
     let a_on_d = options.a[0] / options.component.forward;
     let c_on_b = c / options.component.sideways;
     let a_on_r = options.a[0] / options.component.radius;
+    // phis is a vector of angles around the crack front. It depends
+    // on the beta whether any or all of the angles are used. Most
+    // just use the first and some use the last as well.
     let phis = vec![0.0, FRAC_PI_2];
 
     // Initialise the history
@@ -422,7 +421,7 @@ Warning: There are no sequence lines in the cycle list and so there
             grow::display_history_line(&history, &options.output_vars, &options.component);
         }
         // Only keep the history if we are producing a fracto image.
-        if options.image.file != "" {
+        if options.image.filename != "" {
             history_all.push(history);
         }
     }

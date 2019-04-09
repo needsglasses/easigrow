@@ -25,7 +25,7 @@ use svg;
 #[derive(Debug, Clone)]
 pub struct ImageData {
     /// Name of pseudo image file.
-    pub file: String,
+    pub filename: String,
     /// Size of scale bar for image.
     pub barlength: f64,
     pub xsize: u32,
@@ -86,7 +86,7 @@ fn kmax_color_model(cycle: &History, cycle_max: &History) -> f64 {
 /// Make a pseudo image of the fracture surface.
 ///
 /// Fit the entire crack growth history into the image frame.
-pub fn write_svg_pseudo_image(history: &[History], frame: &ImageData, filename: &str) {
+pub fn write_svg_pseudo_image(history: &[History], frame: &ImageData) {
     let mut document = Document::new().set("viewBox", (0, 0, frame.ysize, frame.xsize));
 
     let lightest = 1.0;
@@ -207,7 +207,7 @@ pub fn write_svg_pseudo_image(history: &[History], frame: &ImageData, filename: 
 
     // document = document.add(path);
 
-    svg::save(filename, &document).unwrap();
+    svg::save(&frame.filename, &document).unwrap();
 }
 
 // put a micron bar on the image
@@ -252,8 +252,8 @@ mod tests {
             da: vec![da],
             crack: CrackState {
                 a: vec![a],
-                mono_zone_extent: ZoneWidth{plane_stress: 0.1, plane_strain: 0.1},
-                cyclic_zone_extent: ZoneWidth{plane_stress: 0.1, plane_strain: 0.1},
+                mono_zone_extent: ZoneWidth{ plane_stress: 0.1, plane_strain: 0.1 },
+                cyclic_zone_extent: ZoneWidth{ plane_stress: 0.1, plane_strain: 0.1 },
             },
         };
 
@@ -270,16 +270,15 @@ mod tests {
             }
         }
         
-        let image = ImageData { file: "test.png".to_string(),
+        let image = ImageData { filename: "/tmp/fracto-test.svg".to_string(),
                                 barlength: 5e-6,
                                 xsize:300,
                                 ysize: 800,
                                 image: ImageType::Sem,
     };
 
-        let filename = "/tmp/fracto-test.svg";
-        write_svg_pseudo_image(&history, &image, filename) ;
-        assert_eq!(Path::new(filename).exists(), true);
-        let _r = fs::remove_file(filename);
+        write_svg_pseudo_image(&history, &image) ;
+        assert_eq!(Path::new(&image.filename).exists(), true);
+        let _r = fs::remove_file(image.filename);
     }
 }
