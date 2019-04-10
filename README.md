@@ -16,7 +16,7 @@ The version number has also been reset to 0.0.0.
 - Calculates the crack growth size
 - Choice of beta models, material properties and crack growth equations
 - Optimises model coefficients to match data
-- Generates a psuedo image of the crack growth patterns
+- Generates a pseudo image of the crack growth patterns
 
 ## Getting started
 
@@ -93,7 +93,6 @@ without any additional terms or conditions.
 
 [Rust]: https://www.rust-lang.org/downloads.html
 [issues]: https://github.com/needsglasses/easigrow/issues/new
-[contributing]: Contributing.md
 [user_manual]: http://needsglasses.github.io/easigrow/latest/book/
 [devdoc]: http://needsglasses.github.io/easigrow/latest/easigrow/
 
@@ -102,8 +101,21 @@ without any additional terms or conditions.
 Here are some other programs on Github for analysing metal fatigue:
 
 * [pdprop] Simulation of metal fatigue crack propagation with accounting for material memory effects in Fortran
-
 * [FCGR] Fatigue Crack Growth in Reliability using R
+* [metal-fatigue] Start of a fatigue library in Python with some rainflow counting routines
 
+and elsewhere
+
+* [Afgrow] USAF Crack growth software for Windows
+* [Nasgro] NASA Crack growth software with large material library
+* [Fastran] Crack growth using closure in Fortran
+* [Kujawski] Interactive web based software for crack initiation and growth
+
+[Kujawski]: https://scholarworks.wmich.edu/cgi/viewcontent.cgi?article=1057&context=fracaa
+[efatigue]: https://www.efatigue.com/
+[Fastran]: https://www.researchgate.net/publication/24314111_FASTRAN-2_A_fatigue_crack_growth_structural_analysis_program
+[Nasgro]: https://www.swri.org/consortia/nasgro
+[Afgrow]: https://www.afgrow.net/
+[metal-fatigue]: https://github.com/alexm2303/metal-fatigue
 [pdprop]: https://github.com/pdprop/pdprop
 [FCGR]: https://github.com/cran/FCGR
