@@ -96,3 +96,14 @@ without any additional terms or conditions.
 [contributing]: Contributing.md
 [user_manual]: http://needsglasses.github.io/easigrow/latest/book/
 [devdoc]: http://needsglasses.github.io/easigrow/latest/easigrow/
+
+## Other Programs
+
+Here are some other programs on Github for analysing metal fatigue:
+
+* [pdprop] Simulation of metal fatigue crack propagation with accounting for material memory effects in Fortran
+
+* [FCGR] Fatigue Crack Growth in Reliability using R
+
+[pdprop]: https://github.com/pdprop/pdprop
+[FCGR]: https://github.com/cran/FCGR
