@@ -232,7 +232,6 @@ mod tests {
     use grow::CrackState;
     use tag::Tag;
     use std::path::Path;
-    use std::fs;
     
     #[test]
     fn test_make_pseudo_image() {
@@ -246,8 +245,8 @@ mod tests {
             block: block,
             stress: 300.0,
             cycle: Cycle::new(Tag::new(peak, 0), Tag::new(0.0, 0)),
-            k: vec![1.0],
-            dk: vec![1.0],
+            k: vec![peak],
+            dk: vec![peak],
             beta: vec![1.0],
             da: vec![da],
             crack: CrackState {
@@ -278,7 +277,7 @@ mod tests {
     };
 
         write_svg_pseudo_image(&history, &image) ;
-        assert_eq!(Path::new(&image.file).exists(), true);
+        assert!(Path::new(&image.file).exists());
         let _r = fs::remove_file(image.file);
     }
 }
