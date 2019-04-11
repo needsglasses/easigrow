@@ -16,7 +16,7 @@ use beta;
 /// Data collected for each crack growth prediction cycle.
 #[derive(Debug, Clone)]
 pub struct History {
-    /// Number of block.
+    /// Floating point number for block where fractional parts gives fraction of cycle in the block
     pub block: f64,
     /// Applied scaling stress for this cycle.
     pub stress: f64,
@@ -142,7 +142,8 @@ impl History {
         beta: &mut Box<U>,
         component: &Component,
     ) -> History {
-        // grow the crack cycle by cycle
+
+        // destructure the given cycle
         let Cycle {
             max: tag::Tag {
                 value: smax,
@@ -205,13 +206,13 @@ impl History {
             da_all.push(da);
         }
 
-        // size of the plastic zone
+        // Calculate the size of the plastic zone based on the largest k and dk around the crack front
         let kmax = k_all.iter().fold(k_all[0], |f, x| x.max(f));
         let dkmax = dk_all.iter().fold(dk_all[0], |f, x| x.max(f));
 
         let mono_zone_extent = plastic::zone_size(kmax, component.material.yield_stress);
-        // Simply double the yield stress to get the cyclic stress yield stress
-        let cyclic_zone_extent = plastic::zone_size(dkmax, 2. * component.material.yield_stress);
+        // Double the yield stress to get the cyclic stress yield stress.
+        let cyclic_zone_extent = plastic::zone_size(dkmax, 2.0 * component.material.yield_stress);
 
         History {
             block: self.block, // part_block,
