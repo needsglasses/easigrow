@@ -12,7 +12,7 @@ is the length of the crack from the centre-line of the pin
 attachments. All distance units are given in m.
 
 ```
-./easigrow -s 5000e-6 -b compact-tada73 -o block,a,k -a 0.015 -e 0.05  
+./easigrow -s 5000e-6 -b compact-tada73 -o block,a,k -a 0.015 -e 0.05
           -q sequences/seq2.txt --forward=0.05 --sideways=0.0125 -n 10 
 
 #  easigrow: version 0.0.0

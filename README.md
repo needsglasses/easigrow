@@ -98,18 +98,18 @@ without any additional terms or conditions.
 
 ## Other Programs
 
-Here are some other programs on Github for analysing metal fatigue:
+Fatigue crack growth programs
+
+* [Afgrow] USAF crack growth software for Windows
+* [Nasgro] NASA crack growth software with large material library
+* [Fastran] Crack growth using closure in Fortran
+* [Kujawski] Interactive web based software for crack initiation and growth
+
+and some others on Github that may need further work:
 
 * [pdprop] Simulation of metal fatigue crack propagation with accounting for material memory effects in Fortran
 * [FCGR] Fatigue Crack Growth in Reliability using R
 * [metal-fatigue] Start of a fatigue library in Python with some rainflow counting routines
-
-and elsewhere
-
-* [Afgrow] USAF Crack growth software for Windows
-* [Nasgro] NASA Crack growth software with large material library
-* [Fastran] Crack growth using closure in Fortran
-* [Kujawski] Interactive web based software for crack initiation and growth
 
 [Kujawski]: https://scholarworks.wmich.edu/cgi/viewcontent.cgi?article=1057&context=fracaa
 [efatigue]: https://www.efatigue.com/
