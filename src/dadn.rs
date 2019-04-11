@@ -6,7 +6,6 @@
 use table;
 use std::f64::consts::FRAC_PI_2;
 use std::{fmt, process, f64};
-
 use log::{info, warn, error};
 
 /// Defines the state of the crack for any dadn equation that requires
