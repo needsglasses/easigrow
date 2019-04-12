@@ -485,12 +485,12 @@ mod tests {
         let tol = 1e-5;
         //assert_eq!(nasgro_table.interp(6.8865, 0.08), 8.156e-7);
         //        assert_eq!(nasgro_table.interp(6.1235, 0.7), 3.9566e-6);
-        ///assert_eq!(nasgro_table.interp(5.8345, 0.8), 3.9566e-6);
-        ///assert_eq!(nasgro_table.interp(23.1962, 0.08), 6.0e-5);
+        //assert_eq!(nasgro_table.interp(5.8345, 0.8), 3.9566e-6);
+        //assert_eq!(nasgro_table.interp(23.1962, 0.08), 6.0e-5);
         
         assert!((nasgro_table.interp(6.8865, 0.08) - 8.156e-7).abs() < tol);
         // these fail in the table lookup
-        ///assert!((nasgro_table.interp(5.8345, 0.8) - 3.9566e-6).abs() < tol);
+        //assert!((nasgro_table.interp(5.8345, 0.8) - 3.9566e-6).abs() < tol);
         //assert!((nasgro_table.interp(23.1962, 0.08) - 6.0e-5).abs() < tol);
         assert!((nasgro_table.interp(4.7534, 0.5) - 8.9219e-7).abs() < tol);
 
