@@ -232,6 +232,7 @@ mod tests {
     use grow::CrackState;
     use tag::Tag;
     use std::path::Path;
+    use std::fs;
     
     #[test]
     fn test_make_pseudo_image() {
