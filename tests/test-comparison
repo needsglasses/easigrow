@@ -7,7 +7,7 @@ coupon sequence easigrow test
 0 3  482.9070 173.3
 # easigrow --dadn white:barter14-aa7050t7451 -q data/sequences/rainflow-seq4.txt -s 300 --beta qcct-mcdonald07
 0 4  123.0112  95.6
-# easigrow --dadn white:barter14-aa7050t7451 -q data/sequences/sequences/rainflow-seq5.txt -s 300 --beta qcct-mcdonald07
+# easigrow --dadn white:barter14-aa7050t7451 -q data/sequences/rainflow-seq5.txt -s 300 --beta qcct-mcdonald07
 0 5  339.7211 237.1
 # Long crack middle crack tension coupon
 # easigrow --dadn white:barter14-aa7050t7451 -q data/sequences/rainflow-seq2.txt -s 75 --beta ct-koiter65 --astart 6e-3 -e 0.1 -n 10 --output_vars block,a,a/d --forward 48e-3
