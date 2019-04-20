@@ -10,13 +10,13 @@ use log::{info, warn};
 
 /// A point on the simplex.
 #[derive(Debug, Clone)]
-struct Result {
+struct Eval {
     x: MVector<f64>,
     score: f64,
 }
 
 // finds the centroids of a list of points
-fn centroid(simplex: &[Result]) -> MVector<f64> {
+fn centroid(simplex: &[Eval]) -> MVector<f64> {
     let n = simplex[0].x.len();
     let mut zero = Vec::new();
 
@@ -96,7 +96,7 @@ where
     let mut ops = Vec::new();
 
     // results.push(Result {x: x_start.clone(), score: f(x_start.as_ref())});
-    results.push(Result {
+    results.push(Eval {
         x: x_start.clone(),
         score: f(x_start.as_slice()),
     });
@@ -106,8 +106,8 @@ where
         let mut x_init = x_start.clone();
         // just have to peer inside vec here cause I can't make it work otherwise
         x_init.m[i] += params.step;
-        // results.push(Result {x: x_init.clone(), score: f(x_init.as_ref())});
-        results.push(Result {
+        // results.push(Eval {x: x_init.clone(), score: f(x_init.as_ref())});
+        results.push(Eval {
             x: x_init.clone(),
             score: f(x_init.as_slice()),
         });
@@ -164,7 +164,7 @@ The answer may not be optimum. Try increasing the limit.", max_iter);
             info!("Nelder: Including reflected point");
 
             results.pop().unwrap();
-            results.push(Result {
+            results.push(Eval {
                 x: xr,
                 score: rscore,
             });
@@ -184,13 +184,13 @@ The answer may not be optimum. Try increasing the limit.", max_iter);
 
             if escore < rscore {
                 ops.push(Operation::Expansion);
-                results.push(Result {
+                results.push(Eval {
                     x: xe,
                     score: escore,
                 });
                 continue;
             } else {
-                results.push(Result {
+                results.push(Eval {
                     x: xr,
                     score: rscore,
                 });
@@ -210,7 +210,7 @@ The answer may not be optimum. Try increasing the limit.", max_iter);
 
             ops.push(Operation::Contraction);
             results.pop().unwrap();
-            results.push(Result {
+            results.push(Eval {
                 x: xc,
                 score: cscore,
             });
@@ -300,20 +300,20 @@ mod tests {
     use log::info;
 
     use super::{centroid, nelder_mead};
-    use super::{Nelder, Result};
+    use super::{Nelder, Eval};
 
     #[test]
     fn test_centroid() {
         let x = vec![
-            Result {
+            Eval {
                 x: MVector::from_row_slice(3, &[0.0, 0.0, 0.0]),
                 score: 0.0,
             },
-            Result {
+            Eval {
                 x: MVector::from_row_slice(3, &[1.0, 2.5, 1.0]),
                 score: 0.0,
             },
-            Result {
+            Eval {
                 x: MVector::from_row_slice(3, &[2.0, 3.5, 2.0]),
                 score: 0.0,
             },
@@ -332,15 +332,15 @@ mod tests {
         let f = |x: &[f64]| (x[0].sin() * x[1].cos()) * (1.0 / (x[2].abs() + 1.0));
 
         let x = vec![
-            Result {
+            Eval {
                 x: MVector::from_row_slice(3, &[0.0f64, 0.0, 0.0]),
                 score: 0.0,
             },
-            Result {
+            Eval {
                 x: MVector::from_row_slice(3, &[1.0f64, 1.5, 1.0]),
                 score: 0.0,
             },
-            Result {
+            Eval {
                 x: MVector::from_row_slice(3, &[2.0f64, 2.5, 2.0]),
                 score: 0.0,
             },
