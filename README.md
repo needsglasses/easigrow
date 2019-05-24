@@ -44,15 +44,18 @@ easigrow -q data/rainflow-seq2.txt -s 300 -n 100
 
 ### Documentation
 
-In addition to the above mentioned report, there are the following
-sources of documentation:
+The following documentation contains most of what is in the above report:
 
-- Run `easigrow --help`
-  if you want to use Easigrow as a command line tool
-  without writing code.
-- Examples using the command line in the `doc` directory
-- Run `Cargo doc` to generate documentation for all the library public
-  functions and use Easigrow as a library inside your own code.
+* [help](doc/help.md) `easigrow --help` command line options 
+* [list](doc/list.md) `easigrow --list` output variables, beta models, da/dN data
+* [dadn](doc/dadn.md) dadn equations used (incomplete because of markdown)
+* [grow](doc/grow.md) grow the crack
+* [optimisation](doc/optimisation.md) How to optimsise a model
+* [fracto](doc/fracto.md) generate a pseudo-fracto image
+* [sequences](doc/sequences.md) Supplied loading sequences
+* [summary](doc/summary.md) Summarise a sequence
+
+You can also run `Cargo doc` to generate documentation for all the library public functions and use Easigrow as a library inside your own code.
 
 ### Installation as a command line tool
 
@@ -103,15 +106,14 @@ Fatigue crack growth programs
 * [Afgrow] USAF crack growth software for Windows
 * [Nasgro] NASA crack growth software with large material library
 * [Fastran] Crack growth using closure in Fortran
-* [Kujawski] Interactive web based software for crack initiation and growth
 
-and some others on Github that may need further work:
+and some other open source programs on Github:
 
 * [pdprop] Simulation of metal fatigue crack propagation with accounting for material memory effects in Fortran
 * [FCGR] Fatigue Crack Growth in Reliability using R
 * [metal-fatigue] Start of a fatigue library in Python with some rainflow counting routines
+* [fatpack]: Python fatigue routines
 
-[Kujawski]: https://scholarworks.wmich.edu/cgi/viewcontent.cgi?article=1057&context=fracaa
 [efatigue]: https://www.efatigue.com/
 [Fastran]: https://www.researchgate.net/publication/24314111_FASTRAN-2_A_fatigue_crack_growth_structural_analysis_program
 [Nasgro]: https://www.swri.org/consortia/nasgro
@@ -119,3 +121,4 @@ and some others on Github that may need further work:
 [metal-fatigue]: https://github.com/alexm2303/metal-fatigue
 [pdprop]: https://github.com/pdprop/pdprop
 [FCGR]: https://github.com/cran/FCGR
+[fatpack]: https://github.com/gunnstein/fatpack
